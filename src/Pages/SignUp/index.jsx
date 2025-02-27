@@ -13,11 +13,11 @@ const primaryVariants = {
 
 export const SlideInAuth = () => {
   return (
-    <div className="flex max-h-[90vh] grid-cols-1 bg-slate-900 md:grid-cols-[1fr,_400px] lg:grid-cols-[1fr,_600px]">
-      <div className="w-[50vw]">
+    <div className="flex max-h-full flex-col md:flex-row grid-cols-1 bg-slate-900 md:grid-cols-[1fr,_400px] lg:grid-cols-[1fr,_600px]">
+      <div className="w-screen md:w-[50vw]">
         <Form />
       </div>
-      <div className="w-[50vw]">
+      <div className="w-screen md:w-[50vw]">
         <SupplementalContent />
       </div>
     </div>
@@ -82,7 +82,7 @@ const Form = () => {
         initial: { opacity: 0 },
         animate: { opacity: 1, transition: { staggerChildren: 0.05 } },
       }}
-      className="flex items-center justify-center py-20 max-h-[90vh]"
+      className="flex items-center justify-center py-20 max-h-[95vh]"
     >
       <div className="mx-auto max-w-lg px-4">
         <motion.h1
