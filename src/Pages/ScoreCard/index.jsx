@@ -22,7 +22,7 @@ const Scorecard = () => {
 
   return (
     <div className="bg-gradient-to-r from-indigo-700 to-indigo-900 text-white min-h-screen flex flex-col items-center justify-center p-8">
-      <div className="bg-white p-8 rounded shadow-md w-full max-w-2xl">
+      <div className="bg-white p-8 rounded shadow-md w-full max-w-4xl">
         <h1 className="text-3xl font-bold mb-4 text-black">4D Leadership Intelligence Scorecard</h1>
         {!submitted ? (
           <ScorecardForm onSubmit={handleSubmit} />
