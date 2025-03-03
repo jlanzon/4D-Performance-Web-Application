@@ -40,6 +40,9 @@ const Navbar = () => {
             <Link to="/profile" className="ml-4">
               Profile
             </Link>
+            <Link to="/coach" className="ml-4">
+              My Coach
+            </Link>
           </>
         ) : (
           <>

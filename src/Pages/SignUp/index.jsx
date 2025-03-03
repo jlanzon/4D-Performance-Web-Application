@@ -65,6 +65,7 @@ const Form = () => {
         firstName,
         lastName,
         email,
+        role: "user",
       });
       navigate("/");
     } catch (err) {
