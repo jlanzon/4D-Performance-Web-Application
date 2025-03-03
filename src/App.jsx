@@ -15,7 +15,11 @@ import CoachLayout from './Pages/Coach/CoachLayout';
 import Chat from './Pages/Coach/Chat';
 import Settings from './Pages/Coach/Settings';
 import DailyCheckIn from './Pages/Coach/DailyCheckIn';
-import Blog from './Pages/Coach/Blog';
+import Blog from './Pages/Coach/Blog/Blog'
+import BlogLayout from './Pages/Coach/Blog/BlogLayout';
+import BlogList from './Pages/Coach/Blog/BlogList';
+import BlogCreate from './Pages/Coach/Blog/BlogCreate';
+import BlogView from './Pages/Coach/Blog/BlogView';
 
 function App() {
   return (
@@ -56,7 +60,11 @@ function App() {
           <Route path="chat" element={<Chat />} />
           <Route path="settings" element={<Settings />} />
           <Route path="daily-checkin" element={<DailyCheckIn />} />
-          <Route path="blog" element={<Blog />} />
+          <Route path="blog" element={<BlogLayout />}>
+            <Route path="list" element={<BlogList />} />
+            <Route path="create" element={<BlogCreate />} />
+            <Route path=":blogId" element={<BlogView />} />
+          </Route>
         </Route>
       </Routes>
     </Router>
