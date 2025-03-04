@@ -13,9 +13,9 @@ const CoachLayout = () => {
     <div className="min-h-screen bg-slate-900 text-white flex pt-12">
       {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-40 w-64 bg-slate-800 transform transition-transform duration-300 ease-in-out ${
+        className={`fixed inset-y-0 left-0 z-40 w-40 bg-slate-800 transform transition-transform duration-300 ease-in-out ${
           isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        } md:static md:translate-x-0 md:w-64`}
+        } md:static md:translate-x-0 md:w-40`}
       >
         <div className="p-4">
           <button onClick={toggleSidebar} className="md:hidden text-white">
