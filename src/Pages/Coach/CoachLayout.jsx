@@ -18,15 +18,16 @@ const CoachLayout = () => {
         } md:static md:translate-x-0 md:w-40`}
       >
         <div className="p-4">
-          <button onClick={toggleSidebar} className="md:hidden text-white">
-            Close
-          </button>
+         
           <div className="flex flex-col gap-4 mt-4">
             <Link to="chat" className="hover:underline">Chat</Link>
             <Link to="settings" className="hover:underline">Settings</Link>
             <Link to="daily-checkin" className="hover:underline">Daily Check-In</Link>
             <Link to="blog" className="hover:underline">Blog</Link>
           </div>
+          <button onClick={toggleSidebar} className="md:hidden text-white">
+            Close
+          </button>
         </div>
       </aside>
 

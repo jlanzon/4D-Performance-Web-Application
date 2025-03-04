@@ -8,7 +8,7 @@ export default function Testimonials() {
       transition={{ duration: 0.5 }}
       className="container mx-auto px-4 py-12"
     >
-      <h2 className="text-4xl font-bold text-center mb-8 text-white">What Our Users Say</h2>
+      <h2 className="text-4xl font-bold text-center mb-8 text-black">What Our Users Say</h2>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         <div className="bg-white p-6 rounded-lg shadow-lg">
           <p className="text-black italic">
