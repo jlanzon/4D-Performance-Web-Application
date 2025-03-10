@@ -1,17 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuthState } from 'react-firebase-hooks/auth';
-import { auth, db } from '../../firebase'; // Adjust the import path as needed
+import { auth, db } from '../../firebase';
 import { doc, getDoc } from 'firebase/firestore';
+import { DarkModeContext } from '../../context/Theme';
 
 const Navbar = () => {
-  // State for authentication and user data
   const [user, loading] = useAuthState(auth);
   const [firstName, setFirstName] = useState('');
   const [photoURL, setPhotoURL] = useState('');
   const [isOpen, setIsOpen] = useState(false);
+  const { isDark, toggleDarkMode } = useContext(DarkModeContext);
 
-  // Fetch user data from Firestore when user is authenticated
   useEffect(() => {
     const fetchUserData = async () => {
       if (user) {
@@ -30,35 +30,36 @@ const Navbar = () => {
 
   return (
     <div className="fixed top-0 left-0 right-0 z-50 p-4">
-      <div className="w-full flex justify-between md:w-[80vw] mx-auto bg-white-500/50 backdrop-blur-md text-white rounded-lg shadow-lg p-4">
-        {/* Top row with logo and hamburger button */}
+      <div className="w-full flex justify-between md:w-[80vw] mx-auto bg-white-500/50 dark:bg-stone-800/50 backdrop-blur-md text-white dark:text-pink-100 rounded-lg shadow-lg p-4">
         <div className="flex items-center justify-between w-full">
-          <div className="font-bold text-xl transform hover:scale-105 transition-transform duration-300">
+          <div className="font-bold text-xl transform hover:scale-105 transition-transform duration-300 text-black dark:text-white">
             <Link to="/">4D Leader</Link>
           </div>
-          <button
-            className="md:hidden focus:outline-none transform transition-transform duration-300 hover:scale-110"
-            onClick={() => setIsOpen(!isOpen)}
-            aria-label="Toggle menu"
-          >
-            <svg
-              className={`w-6 h-6 transition-transform duration-300 ${isOpen ? 'rotate-90' : ''}`}
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
+          <div className="flex items-center space-x-4">
+           
+            <button
+              className="md:hidden focus:outline-none transform transition-transform duration-300 hover:scale-110"
+              onClick={() => setIsOpen(!isOpen)}
+              aria-label="Toggle menu"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d={isOpen ? 'M6 18L18 6M6 6l12 12' : 'M4 6h16M4 12h16M4 18h16'}
-              />
-            </svg>
-          </button>
+              <svg
+                className={`w-6 h-6 transition-transform duration-300 ${isOpen ? 'rotate-90' : ''}`}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d={isOpen ? 'M6 18L18 6M6 6l12 12' : 'M4 6h16M4 12h16M4 18h16'}
+                />
+              </svg>
+            </button>
+          </div>
         </div>
 
-        {/* --- Desktop nav --- */}
         <div className="hidden md:flex md:items-center md:space-x-4 mt-2 p-4 md:p-0">
           {loading ? (
             <span className="block md:inline-block py-2 md:py-0">Loading...</span>
@@ -83,33 +84,45 @@ const Navbar = () => {
                   />
                 )}
               </Link>
+              <button
+                onClick={toggleDarkMode}
+                className="p-2 rounded-full text-black dark:text-white"
+                aria-label="Toggle dark mode"
+              >
+                {isDark ? '🌙' : '☀️'}
+              </button>
             </>
           ) : (
             <>
               <Link
                 to="/login"
-                className="block md:inline-block py-2 md:py-0 text-white px-2 rounded transition-colors duration-200"
+                className="block md:inline-block py-2 md:py-0 text-white dark:text-stone-100 px-2 rounded transition-colors duration-200"
               >
                 Login
               </Link>
               <Link
                 to="/signup"
-                className="block md:inline-block py-2 md:py-0 text-white px-2 rounded transition-colors duration-200"
+                className="block md:inline-block py-2 md:py-0 text-white dark:text-stone-100 px-2 rounded transition-colors duration-200"
               >
                 Sign Up
               </Link>
+              <button
+                onClick={toggleDarkMode}
+                className="p-2 rounded-full bg-stone-200 dark:bg-stone-700 text-black dark:text-white"
+                aria-label="Toggle dark mode"
+              >
+                {isDark ? '☀️' : '🌙'}
+              </button>
             </>
           )}
         </div>
       </div>
 
-      {/* --- Full-screen overlay for mobile nav --- */}
       <div
-        className={`fixed top-0 left-0 w-screen h-screen bg-white-500/50 backdrop-blur-md text-black z-40 transition-transform duration-300
+        className={`fixed top-0 left-0 w-screen h-screen bg-white-500/50 dark:bg-stone-800/50 backdrop-blur-md text-black dark:text-white z-40 transition-transform duration-300
           flex flex-col items-center justify-center p-8
           ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}
       >
-        {/* Close button (re-uses hamburger to toggle) */}
         <button
           onClick={() => setIsOpen(false)}
           className="absolute top-4 right-4 focus:outline-none"
@@ -156,6 +169,12 @@ const Navbar = () => {
                 />
               )}
             </Link>
+            <button
+              onClick={toggleDarkMode}
+              className="text-xl mb-4 hover:underline flex items-center"
+            >
+              {isDark ? 'Light Mode ☀️' : 'Dark Mode 🌙'}
+            </button>
           </>
         ) : (
           <>
@@ -173,6 +192,12 @@ const Navbar = () => {
             >
               Sign Up
             </Link>
+            <button
+              onClick={toggleDarkMode}
+              className="text-xl mb-4 hover:underline flex items-center"
+            >
+              {isDark ? 'Light Mode ☀️' : 'Dark Mode 🌙'}
+            </button>
           </>
         )}
       </div>
