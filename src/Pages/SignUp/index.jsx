@@ -13,11 +13,11 @@ const primaryVariants = {
 
 export const SlideInAuth = () => {
   return (
-    <div className="flex max-h-full flex-col md:flex-row grid-cols-1 bg-slate-900 md:grid-cols-[1fr,_400px] lg:grid-cols-[1fr,_600px]">
-      <div className="w-screen md:w-[50vw]">
+    <div className="flex h-screen flex-col md:flex-row grid-cols-1 bg-slate-900 ">
+      <div className="w-screen md:w-[50vw] mt-10">
         <Form />
       </div>
-      <div className="w-screen md:w-[50vw]">
+      <div className="w-screen md:w-[50vw] m-auto">
         <SupplementalContent />
       </div>
     </div>
@@ -252,7 +252,7 @@ const Form = () => {
 
 const SupplementalContent = () => {
   return (
-    <div className="group sticky top-4 m-4 h-80 overflow-hidden rounded-3xl rounded-tl-[4rem] bg-slate-950 md:h-[calc(90vh_-_2rem)]">
+    <div className="group sticky top-4 m-4 h-60 overflow-hidden rounded-2xl   bg-slate-950 md:h-[calc(95vh_-_8rem)]">
       <img
         alt="Abstract leadership illustration"
         src="./AICoach.jpg"

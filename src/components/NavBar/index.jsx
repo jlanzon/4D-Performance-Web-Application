@@ -29,9 +29,9 @@ const Navbar = () => {
   }, [user]);
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-50 p-4">
-      <div className="w-full flex justify-between md:w-[80vw] mx-auto bg-white-500/50 dark:bg-stone-800/50 backdrop-blur-md text-white dark:text-pink-100 rounded-lg shadow-lg p-4">
-        <div className="flex items-center justify-between w-full">
+    <div className="fixed top-0 left-0 right-0 z-50 p-4 mx-auto container">
+      <div className="w-full flex justify-between md:w-full bg-white-500/50 dark:bg-zinc-800/20 backdrop-blur-md text-white dark:text-pink-100 rounded-lg shadow-lg p-4">
+        <div className="flex items-center justify-between w-full md:w-[50%] ">
           <div className="font-bold text-xl transform hover:scale-105 transition-transform duration-300 text-black dark:text-white">
             <Link to="/">4D Leader</Link>
           </div>
@@ -106,13 +106,13 @@ const Navbar = () => {
               >
                 Sign Up
               </Link>
-              <button
+              {/* <button
                 onClick={toggleDarkMode}
-                className="p-2 rounded-full bg-stone-200 dark:bg-stone-700 text-black dark:text-white"
+                className="p-2 rounded-full"
                 aria-label="Toggle dark mode"
               >
                 {isDark ? '☀️' : '🌙'}
-              </button>
+              </button> */}
             </>
           )}
         </div>
