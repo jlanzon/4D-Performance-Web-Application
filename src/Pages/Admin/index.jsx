@@ -13,20 +13,32 @@ const AdminPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // Fetch all users from Firestore on component mount
+  const roleOptions = [
+    { value: "user", label: "User", color: "bg-gray-500" },
+    { value: "premium", label: "Premium", color: "bg-blue-500" },
+    { value: "super user", label: "Super User", color: "bg-green-500" },
+    { value: "platinum user", label: "Platinum User", color: "bg-purple-500" },
+    { value: "tester", label: "Tester", color: "bg-yellow-500" },
+    { value: "admin", label: "Admin", color: "bg-red-500" },
+    { value: "manager", label: "Manager", color: "bg-indigo-500" },
+    { value: "moderator", label: "Moderator", color: "bg-pink-500" },
+    { value: "contributor", label: "Contributor", color: "bg-teal-500" },
+  ];
+
   useEffect(() => {
     const fetchUsers = async () => {
-      setLoading(true);
       try {
+        setLoading(true);
+        setError("");
         const querySnapshot = await getDocs(collection(db, "users"));
-        const usersData = [];
-        querySnapshot.forEach((docSnapshot) => {
-          usersData.push({ id: docSnapshot.id, ...docSnapshot.data() });
-        });
+        const usersData = querySnapshot.docs.map((docSnapshot) => ({
+          id: docSnapshot.id,
+          ...docSnapshot.data(),
+        }));
         setUsers(usersData);
       } catch (err) {
         console.error("Error fetching users:", err);
-        setError("Failed to fetch users.");
+        setError("Failed to load users. Please try again later.");
       } finally {
         setLoading(false);
       }
@@ -35,7 +47,6 @@ const AdminPage = () => {
     fetchUsers();
   }, []);
 
-  // Enable editing mode for a user
   const handleEdit = (user) => {
     setEditingUserId(user.id);
     setEditedUserData({
@@ -45,21 +56,16 @@ const AdminPage = () => {
     });
   };
 
-  // Cancel editing mode
   const handleCancel = () => {
     setEditingUserId(null);
     setEditedUserData({ firstName: "", lastName: "", role: "" });
   };
 
-  // Save updated user data to Firestore and update local state
   const handleSave = async (userId) => {
     try {
+      setError("");
       const userDocRef = doc(db, "users", userId);
-      await updateDoc(userDocRef, {
-        firstName: editedUserData.firstName,
-        lastName: editedUserData.lastName,
-        role: editedUserData.role,
-      });
+      await updateDoc(userDocRef, editedUserData);
       setUsers((prevUsers) =>
         prevUsers.map((user) =>
           user.id === userId ? { ...user, ...editedUserData } : user
@@ -68,119 +74,113 @@ const AdminPage = () => {
       setEditingUserId(null);
     } catch (err) {
       console.error("Error updating user:", err);
-      setError("Failed to update user.");
+      setError("Failed to update user. Please try again.");
     }
   };
 
-  // Define role key with label and associated Tailwind classes for colors
-  const roleKey = [
-    { label: "User", className: "bg-gray-500" },
-    { label: "Premium", className: "bg-blue-500" },
-    { label: "Super User", className: "bg-green-500" },
-    { label: "Platinum User", className: "bg-purple-500" },
-    { label: "Tester", className: "bg-yellow-500" },
-    { label: "Admin", className: "bg-red-500" },
-    { label: "Manager", className: "bg-indigo-500" },
-    { label: "Moderator", className: "bg-pink-500" },
-    { label: "Contributor", className: "bg-teal-500" },
-  ];
+  const getRoleColor = (role) => {
+    return roleOptions.find((r) => r.value === role)?.color || "bg-gray-500";
+  };
 
   if (loading) {
-    return <div className="p-8 text-white">Loading users...</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-cyan-300 dark:bg-slate-900">
+        <div className="text-white text-xl animate-pulse">Loading users...</div>
+      </div>
+    );
   }
 
   return (
-    <div className="min-h-screen bg-slate-900 p-8 text-white">
-      <div className="max-w-5xl mx-auto bg-slate-800 shadow-lg rounded-lg p-8">
-        <h1 className="text-3xl font-bold mb-6">Admin Panel - User Management</h1>
-        {error && <p className="text-red-500 mb-4">{error}</p>}
-        <div className="overflow-x-auto mb-8">
-          <table className="min-w-full divide-y divide-gray-700">
-            <thead>
+    <div className="min-h-screen bg-cyan-300 dark:bg-slate-900 p-8">
+      <div className="max-w-6xl mx-auto bg-gradient-to-r mt-22 from-blue-600 to-cyan-800 rounded-xl shadow-2xl p-8">
+        <h1 className="text-3xl font-bold text-white mb-8">Admin Panel - User Management</h1>
+
+        {error && (
+          <div className="mb-6 p-4 bg-red-500/20 border border-red-500 rounded-lg text-red-200">
+            {error}
+          </div>
+        )}
+
+        <div className="overflow-x-auto bg-slate-800 rounded-lg">
+          <table className="w-full text-left">
+            <thead className="bg-slate-900">
               <tr>
-                <th className="py-2 px-4 text-left border-b border-gray-700">Email</th>
-                <th className="py-2 px-4 text-left border-b border-gray-700">First Name</th>
-                <th className="py-2 px-4 text-left border-b border-gray-700">Last Name</th>
-                <th className="py-2 px-4 text-left border-b border-gray-700">Role</th>
-                <th className="py-2 px-4 text-left border-b border-gray-700">Actions</th>
+                {["Email", "First Name", "Last Name", "Role", "Actions"].map((header) => (
+                  <th key={header} className="py-4 px-6 font-semibold text-gray-300">
+                    {header}
+                  </th>
+                ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-700">
+            <tbody>
               {users.map((user) => (
-                <tr key={user.id}>
-                  <td className="py-2 px-4">{user.email}</td>
-                  <td className="py-2 px-4">
+                <tr key={user.id} className="hover:bg-slate-700 transition-colors">
+                  <td className="py-4 px-6 text-gray-200">{user.email}</td>
+                  <td className="py-4 px-6">
                     {editingUserId === user.id ? (
                       <input
                         type="text"
                         value={editedUserData.firstName}
                         onChange={(e) =>
-                          setEditedUserData({
-                            ...editedUserData,
-                            firstName: e.target.value,
-                          })
+                          setEditedUserData({ ...editedUserData, firstName: e.target.value })
                         }
-                        className="w-full p-1 border border-gray-600 rounded bg-slate-700 text-white"
+                        className="w-full p-2 bg-slate-600 border border-slate-500 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                       />
                     ) : (
-                      user.firstName
+                      <span className="text-gray-200">{user.firstName || "-"}</span>
                     )}
                   </td>
-                  <td className="py-2 px-4">
+                  <td className="py-4 px-6">
                     {editingUserId === user.id ? (
                       <input
                         type="text"
                         value={editedUserData.lastName}
                         onChange={(e) =>
-                          setEditedUserData({
-                            ...editedUserData,
-                            lastName: e.target.value,
-                          })
+                          setEditedUserData({ ...editedUserData, lastName: e.target.value })
                         }
-                        className="w-full p-1 border border-gray-600 rounded bg-slate-700 text-white"
+                        className="w-full p-2 bg-slate-600 border border-slate-500 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                       />
                     ) : (
-                      user.lastName
+                      <span className="text-gray-200">{user.lastName || "-"}</span>
                     )}
                   </td>
-                  <td className="py-2 px-4">
+                  <td className="py-4 px-6">
                     {editingUserId === user.id ? (
                       <select
                         value={editedUserData.role}
                         onChange={(e) =>
-                          setEditedUserData({
-                            ...editedUserData,
-                            role: e.target.value,
-                          })
+                          setEditedUserData({ ...editedUserData, role: e.target.value })
                         }
-                        className="w-full p-1 border border-gray-600 rounded bg-slate-700 text-white"
+                        className="w-full p-2 bg-slate-600 border border-slate-500 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                       >
-                        <option value="user">User</option>
-                        <option value="premium">Premium</option>
-                        <option value="super user">Super User</option>
-                        <option value="platinum user">Platinum User</option>
-                        <option value="tester">Tester</option>
-                        <option value="admin">Admin</option>
-                        <option value="manager">Manager</option>
-                        <option value="moderator">Moderator</option>
-                        <option value="contributor">Contributor</option>
+                        {roleOptions.map((role) => (
+                          <option key={role.value} value={role.value}>
+                            {role.label}
+                          </option>
+                        ))}
                       </select>
                     ) : (
-                      user.role
+                      <span
+                        className={`inline-block px-2 py-1 rounded-full text-xs font-medium text-white ${getRoleColor(
+                          user.role
+                        )}`}
+                      >
+                        {roleOptions.find((r) => r.value === user.role)?.label || user.role}
+                      </span>
                     )}
                   </td>
-                  <td className="py-2 px-4">
+                  <td className="py-4 px-6">
                     {editingUserId === user.id ? (
-                      <div className="flex space-x-2">
+                      <div className="flex gap-2">
                         <button
                           onClick={() => handleSave(user.id)}
-                          className="bg-green-600 text-white px-2 py-1 rounded hover:bg-green-700 transition"
+                          className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
                         >
                           Save
                         </button>
                         <button
                           onClick={handleCancel}
-                          className="bg-gray-600 text-white px-2 py-1 rounded hover:bg-gray-500 transition"
+                          className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
                         >
                           Cancel
                         </button>
@@ -188,7 +188,7 @@ const AdminPage = () => {
                     ) : (
                       <button
                         onClick={() => handleEdit(user)}
-                        className="bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700 transition"
+                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                       >
                         Edit
                       </button>
@@ -199,14 +199,14 @@ const AdminPage = () => {
             </tbody>
           </table>
         </div>
-        {/* Role Legend */}
+
         <div className="mt-8">
-          <h2 className="text-xl font-bold mb-4">Role Legend</h2>
-          <div className="flex flex-wrap gap-4">
-            {roleKey.map((role) => (
-              <div key={role.label} className="flex items-center gap-2">
-                <span className={`w-4 h-4 inline-block rounded ${role.className}`} />
-                <span>{role.label}</span>
+          <h2 className="text-xl font-semibold text-white mb-4">Role Legend</h2>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            {roleOptions.map((role) => (
+              <div key={role.value} className="flex items-center gap-2">
+                <span className={`w-4 h-4 rounded-full ${role.color}`} />
+                <span className="text-gray-200">{role.label}</span>
               </div>
             ))}
           </div>
