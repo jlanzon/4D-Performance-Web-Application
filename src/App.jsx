@@ -51,22 +51,41 @@ function App() {
           <Route path="/unauthorized" element={<Unauthorized />} />
 
           <Route
-            path="/coach"
-            element={
-              <ProtectedRoute>
-                <CoachLayout />
-              </ProtectedRoute>
-            }
-          >
-            <Route path="chat" element={<Chat />} />
-            <Route path="settings" element={<Settings />} />
-            <Route path="daily-checkin" element={<DailyCheckIn />} />
-            <Route path="blog" element={<BlogLayout />}>
-              <Route path="list" element={<BlogList />} />
-              <Route path="create" element={<BlogCreate />} />
-              <Route path=":blogId" element={<BlogView />} />
-            </Route>
-          </Route>
+  path="/coach"
+  element={
+    <ProtectedRoute>
+      <CoachLayout />
+    </ProtectedRoute>
+  }
+>
+  <Route
+    path="chat"
+    element={
+      <RoleProtectedRoute
+        allowedRoles={[
+          "Premium",
+          "Super User",
+          "Platinum User",
+          "Tester",
+          "Admin",
+          "Manager",
+          "Moderator",
+          "Contributor",
+          "admin"
+        ]}
+      >
+        <Chat />
+      </RoleProtectedRoute>
+    }
+  />
+  <Route path="settings" element={<Settings />} />
+  <Route path="daily-checkin" element={<DailyCheckIn />} />
+  <Route path="blog" element={<BlogLayout />}>
+    <Route path="list" element={<BlogList />} />
+    <Route path="create" element={<BlogCreate />} />
+    <Route path=":blogId" element={<BlogView />} />
+  </Route>
+</Route>
         </Routes>
       </Router>
     </DarkModeProvider>

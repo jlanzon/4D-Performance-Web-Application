@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "functions": "firebase deploy --only functions",
     "emulator": "firebase emulators:start --only functions,firestore",
     "build": "vite build",
     "fire": "vite build & firebase deploy",
