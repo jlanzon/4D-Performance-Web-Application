@@ -59,10 +59,10 @@ export default function Home() {
                   Get Started
                 </a>
                 <a
-                  href="/learn-more"
-                  className="border border-white text-white font-semibold py-3 px-6 rounded-lg hover:bg-blue-600 hover:text-white transition duration-300"
+                  href="/scorecard"
+                  className="border border-white text-white   font-semibold py-3 px-6 rounded-lg hover:bg-cyan-600 hover:text-white transition duration-300 border-opacity-50"
                 >
-                  Learn More
+                  Take the free Score Card
                 </a>
               </div>
               <img
