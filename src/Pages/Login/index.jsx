@@ -34,7 +34,7 @@ const LoginForm = () => {
     setError('');
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      navigate('/'); // Redirect to home on successful login
+      navigate('/');
     } catch (err) {
       setError(err.message);
     }
@@ -46,12 +46,12 @@ const LoginForm = () => {
       whileInView="animate"
       transition={{ staggerChildren: 0.05 }}
       viewport={{ once: true }}
-      className="flex items-center justify-center py-10 h-full"  // reduced vertical padding
+      className="flex items-center justify-center py-10 h-full"
     >
       <div className="mx-auto max-w-lg px-4">
         <motion.h1
           variants={primaryVariants}
-          className="mb-4 text-center text-4xl font-semibold text-white"
+          className="mb-4 text-center text-4xl font-semibold text-gray-900 dark:text-white"
         >
           Login
         </motion.h1>
@@ -59,7 +59,7 @@ const LoginForm = () => {
         {error && (
           <motion.p
             variants={primaryVariants}
-            className="mb-4 text-center text-red-500"
+            className="mb-4 text-center text-red-500 dark:text-red-400"
           >
             {error}
           </motion.p>
@@ -69,15 +69,15 @@ const LoginForm = () => {
           <motion.div variants={primaryVariants} className="mb-4 w-full">
             <label
               htmlFor="email-input"
-              className="mb-1 inline-block text-sm font-medium text-white"
+              className="mb-1 inline-block text-sm font-medium text-gray-700 dark:text-white"
             >
-              Email<span className="text-red-600">*</span>
+              Email<span className="text-red-600 dark:text-red-400">*</span>
             </label>
             <input
               id="email-input"
               type="email"
               placeholder="Enter your email"
-              className="w-full rounded border border-slate-600 bg-slate-800 px-2.5 py-1.5 text-white focus:outline-indigo-600"
+              className="w-full rounded border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 px-2.5 py-1.5 text-gray-900 dark:text-white focus:outline-indigo-600"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -87,15 +87,15 @@ const LoginForm = () => {
           <motion.div variants={primaryVariants} className="mb-4 w-full">
             <label
               htmlFor="password-input"
-              className="mb-1 inline-block text-sm font-medium text-white"
+              className="mb-1 inline-block text-sm font-medium text-gray-700 dark:text-white"
             >
-              Password<span className="text-red-600">*</span>
+              Password<span className="text-red-600 dark:text-red-400">*</span>
             </label>
             <input
               id="password-input"
               type="password"
               placeholder="Enter your password"
-              className="w-full rounded border border-slate-600 bg-slate-800 px-2.5 py-1.5 text-white focus:outline-indigo-600"
+              className="w-full rounded border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 px-2.5 py-1.5 text-gray-900 dark:text-white focus:outline-indigo-600"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
@@ -106,17 +106,17 @@ const LoginForm = () => {
             variants={primaryVariants}
             whileTap={{ scale: 0.985 }}
             type="submit"
-            className="mb-4 w-full rounded bg-indigo-600 px-4 py-2 text-center font-medium text-white transition-colors hover:bg-indigo-700"
+            className="mb-4 w-full rounded bg-indigo-600 px-4 py-2 text-center font-medium text-white transition-colors hover:bg-indigo-700 dark:hover:bg-indigo-500"
           >
             Login
           </motion.button>
 
           <motion.p
             variants={primaryVariants}
-            className="text-xs text-center text-gray-300"
+            className="text-xs text-center text-gray-600 dark:text-gray-300"
           >
             Don't have an account?{' '}
-            <a className="text-indigo-600 underline" href="/signup">
+            <a className="text-indigo-600 dark:text-indigo-400 underline" href="/signup">
               Sign up
             </a>
           </motion.p>
