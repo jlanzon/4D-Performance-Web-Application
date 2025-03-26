@@ -1,9 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
+import { motion } from 'framer-motion';
 import { scorecardData } from './scorecardData';
 import WaitingList from '../../components/WaitingList';
+import { DarkModeContext } from '../../context/Theme';
+import { FiArrowRight } from 'react-icons/fi';
 
-const ScorecardForm = () => {
-  // Dynamically compute initial answers based on scorecardData, defaulting each to 5
+const ScorecardForm = ({ onSubmit }) => {
+  const { isDark } = useContext(DarkModeContext);
   const initialAnswers = Object.entries(scorecardData).reduce((acc, [category, data]) => {
     data.questions.forEach((_, index) => {
       acc[`${category}${index + 1}`] = 5;
@@ -14,7 +17,6 @@ const ScorecardForm = () => {
   const [answers, setAnswers] = useState(initialAnswers);
   const [feedback, setFeedback] = useState(null);
 
-  // Calculate the average score for a given category
   const calculateAverage = (category) => {
     const categoryAnswers = Object.entries(answers)
       .filter(([key]) => key.startsWith(category))
@@ -23,33 +25,28 @@ const ScorecardForm = () => {
     return sum / categoryAnswers.length;
   };
 
-  // Determine feedback text based on the average (threshold at 6)
   const getFeedbackText = (category, average) => {
     const feedback = scorecardData[category].feedback;
     return average < 6 ? feedback.low : feedback.high;
   };
 
   const getColorClass = (average) => {
-    if (average <= 3.0) return 'text-red-600';      // Red for scores ≤ 3
-    if (average < 8.0) return 'text-yellow-600';    // Amber for scores > 3 and < 8
-    return 'text-green-600';                        // Green for scores ≥ 8
+    if (average <= 3.0) return 'text-red-600';
+    if (average < 8.0) return 'text-yellow-600';
+    return 'text-green-600';
   };
 
-  // Handle form submission
   const handleSubmit = (e) => {
     e.preventDefault();
     const categories = Object.keys(scorecardData);
     const categoryAverages = {};
     
-    // Calculate averages for each category
     categories.forEach((category) => {
       categoryAverages[category] = calculateAverage(category);
     });
     
-    // Calculate overall average
     const overallAverage = Object.values(categoryAverages).reduce((acc, avg) => acc + avg, 0) / categories.length;
 
-    // Build feedback data object
     const feedbackData = {
       overall: overallAverage,
       ...Object.fromEntries(
@@ -64,9 +61,9 @@ const ScorecardForm = () => {
     };
     
     setFeedback(feedbackData);
+    onSubmit(answers); // Pass answers to parent component
   };
 
-  // Handle changes to the range inputs
   const handleChange = (e) => {
     const { name, value } = e.target;
     const numValue = parseInt(value, 10);
@@ -74,19 +71,24 @@ const ScorecardForm = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-4">
-      {/* Scorecard Form */}
-      <form onSubmit={handleSubmit} className="space-y-6">
+    <div className="w-full">
+      <form onSubmit={handleSubmit} className="space-y-8">
         {Object.entries(scorecardData).map(([category, data]) => (
-          <div key={category}>
-            <h2 className="text-2xl font-semibold mb-2 capitalize text-black">
+          <motion.div
+            key={category}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, ease: 'easeOut' }}
+            className={`p-6 rounded-2xl shadow-md ${isDark ? 'bg-gray-800' : 'bg-white'}`}
+          >
+            <h2 className="text-2xl md:text-3xl font-semibold mb-4 capitalize bg-gradient-to-br from-white to-gray-400 bg-clip-text text-transparent">
               {category} Intelligence
             </h2>
             {data.questions.map((question, index) => (
-              <div key={index} className="mb-4">
+              <div key={index} className="mb-6">
                 <label
                   htmlFor={`input-${category}${index + 1}`}
-                  className="block mb-1 text-black"
+                  className={`block mb-2 text-base md:text-lg ${isDark ? 'text-gray-200' : 'text-gray-800'}`}
                 >
                   {question}
                 </label>
@@ -100,50 +102,60 @@ const ScorecardForm = () => {
                     name={`${category}${index + 1}`}
                     value={answers[`${category}${index + 1}`]}
                     onChange={handleChange}
-                    className="w-full focus:ring focus:ring-blue-300"
+                    className={`w-full h-2 rounded-lg appearance-none cursor-pointer ${
+                      isDark ? 'bg-gray-700' : 'bg-gray-200'
+                    }`}
                   />
-                  <span className="ml-4 text-black">
+                  <span className={`ml-4 text-lg font-medium ${isDark ? 'text-gray-200' : 'text-gray-800'}`}>
                     {answers[`${category}${index + 1}`]}
                   </span>
                 </div>
               </div>
             ))}
-          </div>
+          </motion.div>
         ))}
-        <button
+        <motion.button
           type="submit"
-          className="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
+          whileHover={{ scale: 1.015 }}
+          whileTap={{ scale: 0.985 }}
+          className={`group flex items-center gap-2 rounded-full px-6 py-3 text-lg font-medium ${
+            isDark
+              ? 'bg-gray-950/10 text-gray-50 hover:bg-gray-950/50'
+              : 'bg-gray-950/10 text-gray-900 hover:bg-gray-950/20'
+          }`}
         >
           Submit Scorecard
-        </button>
+          <FiArrowRight className="transition-transform group-hover:-rotate-45 group-active:-rotate-12" />
+        </motion.button>
       </form>
       <WaitingList />
-      {/* Feedback Section */}
       {feedback && (
-        <div className="mt-8">
-          <h2 className="text-2xl font-bold mb-4 text-black">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: 'easeOut' }}
+          className="mt-10"
+        >
+          <h2 className="text-2xl md:text-3xl font-bold mb-6 bg-gradient-to-br from-white to-gray-400 bg-clip-text text-transparent">
             Your 4D Intelligence Feedback
           </h2>
-          <p className={`text-lg mb-6 ${getColorClass(feedback.overall)}`}>
+          <p className={`text-lg md:text-xl mb-6 font-semibold ${getColorClass(feedback.overall)}`}>
             Overall Score: {feedback.overall.toFixed(1)}/10
           </p>
           {Object.entries(feedback)
             .filter(([key]) => key !== 'overall')
             .map(([category, data]) => (
               <div key={category} className="mb-6">
-                <h3
-                  className={`text-xl font-semibold capitalize ${getColorClass(
-                    data.average
-                  )}`}
-                >
+                <h3 className={`text-xl md:text-2xl font-semibold capitalize ${getColorClass(data.average)}`}>
                   {category} Intelligence: {data.average.toFixed(1)}/10
                 </h3>
-                <p className="text-black mt-1">{data.feedbackText}</p>
+                <p className={`mt-2 text-base md:text-lg ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                  {data.feedbackText}
+                </p>
               </div>
             ))}
-        </div>
-      )}       
-
+        </motion.div>
+      )}
     </div>
   );
 };

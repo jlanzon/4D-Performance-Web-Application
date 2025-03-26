@@ -4,6 +4,8 @@ import { Cloud, Stars } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
 import { FiArrowRight } from "react-icons/fi";
 import { DarkModeContext } from "../../context/Theme";
+import { NeuPricing } from "./pricing";
+import BasicFAQ from "./FAQ";
 
 const ThemeContext = React.createContext({
   isDark: true,
@@ -20,19 +22,19 @@ const FEATURES = [
   {
     title: "Real-Time Insights",
     description: "Instant access to AI-driven insights for confident decision-making under pressure.",
-    image: "./hr1.jpg",
+    image: "./hr2.jpg",
     alt: "Real-time insights dashboard",
   },
   {
     title: "Holistic Development",
     description: "Grow across Cognitive, Physical, Emotional, and Spiritual dimensions.",
-    image: "./hr1.jpg",
+    image: "./hr3.jpg",
     alt: "Holistic development diagram",
   },
   {
     title: "Burnout Prevention",
     description: "Stay resilient with strategic insights and personalised recommendations.",
-    image: "./hr1.jpg",
+    image: "./hr2.jpg",
     alt: "Burnout prevention strategies",
   },
 ];
@@ -95,6 +97,25 @@ const Scene = React.memo(() => (
   </>
 ));
 
+const COLORS = [
+  "violet-600",
+  "indigo-600",
+  "red-600",
+  "green-600",
+  "blue-600",
+  "yellow-600",
+  "pink-600",
+  "purple-600",
+  "orange-600",
+  "teal-600",
+];
+
+const getRandomGradient = () => {
+  const fromColor = COLORS[Math.floor(Math.random() * COLORS.length)];
+  const toColor = COLORS[Math.floor(Math.random() * COLORS.length)];
+  return `bg-gradient-to-r from-${fromColor}/20 to-${toColor}/20`;
+};
+
 
 export default function Home() {
   const { isDark } = useContext(DarkModeContext); // Access isDark from DarkModeContext
@@ -109,7 +130,7 @@ export default function Home() {
     });
   }, []);
 
-  const baseColor = isDark ? "#020617" : "#F0F0F0"; 
+  const baseColor = isDark ? "#020617" : "#020617"; 
   const backgroundImage = useMotionTemplate`radial-gradient(125% 125% at 50% 0%, ${baseColor} 50%, ${color})`;
   const border = useMotionTemplate`1px solid ${color}`;
   const boxShadow = useMotionTemplate`0px 4px 24px ${color}`;
@@ -128,10 +149,10 @@ export default function Home() {
                 Beta Coming Soon
               </span>
               
-              <h1 className="max-w-3xl bg-gradient-to-br from-gray-900 to-gray-600 dark:from-white dark:to-gray-400 bg-clip-text text-center text-4xl font-extrabold leading-tight text-transparent sm:text-5xl md:text-7xl">
+              <h1 className="max-w-3xl bg-gradient-to-br  from-white to-gray-400 bg-clip-text text-center text-4xl font-extrabold leading-tight text-transparent sm:text-5xl md:text-7xl">
                 Empower Your Leadership with AI
               </h1>
-              <p className="my-6 max-w-xl text-center text-base leading-relaxed md:text-lg text-gray-700 dark:text-gray-200">
+              <p className="my-6 max-w-xl text-center text-base leading-relaxed md:text-lg  text-gray-200">
                 Your AI-powered executive coach for clarity, confidence, and resilience.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
@@ -140,7 +161,7 @@ export default function Home() {
                   style={{ border, boxShadow }}
                   whileHover={{ scale: 1.015 }}
                   whileTap={{ scale: 0.985 }}
-                  className="group flex items-center gap-2 rounded-full bg-gray-950/10 dark:bg-gray-950/10 px-6 py-3 text-gray-900 dark:text-gray-50 transition-colors hover:bg-gray-950/20 dark:hover:bg-gray-950/50"
+                  className="group flex items-center gap-2 rounded-full bg-gray-950/10 px-6 py-3 text-gray-50 transition-colors hover:bg-gray-950/20 dark:hover:bg-gray-950/50"
                 >
                   Get Started
                   <FiArrowRight className="transition-transform group-hover:-rotate-45 group-active:-rotate-12" />
@@ -149,7 +170,7 @@ export default function Home() {
                   href="/scorecard"
                   whileHover={{ scale: 1.015 }}
                   whileTap={{ scale: 0.985 }}
-                  className="flex items-center gap-2 rounded-full border-2 border-gray-700 dark:border-gray-200 px-6 py-3 text-gray-900 dark:text-gray-50 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-200 transition-colors"
+                  className="flex items-center gap-2 rounded-full border-2 border-gray-200 px-6 py-3 text-gray-50 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-200 transition-colors"
                 >
                   Free Score Card
                 </motion.a>
@@ -167,16 +188,16 @@ export default function Home() {
           </motion.header>
   
           {/* Main Content */}
-          <main className="relative -mt-20 rounded-t-[3rem] pt-20 bg-white dark:bg-gray-900">
+          <main className="relative -mt-20 rounded-t-[3rem] pt-20 bg-gray-100 dark:bg-gray-900">
             {/* Features Section */}
-            <MotionSection className="container mx-auto px-6 py-16">
+            <div className="container mx-auto px-6 py-16">
               <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-gray-900 dark:text-white">Key Features</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 ">
                 {FEATURES.map((feature) => (
                   <motion.div
                     key={feature.title}
                     whileHover={{ y: -5 }}
-                    className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-md hover:shadow-xl transition-shadow"
+                    className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-md hover:shadow-xl transition-shadow z-10"
                   >
                     <img
                       src={feature.image}
@@ -189,41 +210,18 @@ export default function Home() {
                   </motion.div>
                 ))}
               </div>
-            </MotionSection>
+            </div>
   
-            {/* AI Features Section */}
-            <MotionSection className="container mx-auto px-6 py-16 rounded-3xl bg-gray-200 dark:bg-gray-100">
-              <h2 className="text-3xl md:text-4xl font-bold text-center mb-4 text-gray-800 dark:text-gray-900">Powered by AI</h2>
-              <p className="text-lg text-center mb-12 max-w-3xl mx-auto text-gray-600 dark:text-gray-700">
-                Leveraging cutting-edge AI for personalised, real-time coaching.
-              </p>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {AI_FEATURES.map((feature, index) => (
-                  <motion.div
-                    key={index}
-                    whileHover={{ y: -5 }}
-                    className="bg-white dark:bg-gray-50 p-6 rounded-xl shadow-md hover:shadow-xl transition-shadow"
-                  >
-                    <img
-                      src={feature.image}
-                      alt={feature.alt}
-                      loading="lazy"
-                      className="w-full h-48 object-cover rounded-lg mb-4"
-                    />
-                    <p className="text-gray-700 dark:text-gray-600">{feature.description}</p>
-                  </motion.div>
-                ))}
-              </div>
-            </MotionSection>
+            
   
             {/* Testimonials Section */}
-            <MotionSection className="container mx-auto px-6 py-16">
+            <div className="container mx-auto px-6 py-16">
               <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-gray-900 dark:text-white">What Our Users Say</h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {TESTIMONIALS.map((testimonial, index) => (
                   <div
                     key={index}
-                    className="bg-gray-800 dark:bg-gray-200 p-6 rounded-xl shadow-md"
+                    className="bg-gray-800 dark:bg-gray-200 p-6 z-10 rounded-xl shadow-md"
                   >
                     <blockquote className="text-gray-300 dark:text-gray-600 italic mb-4">"{testimonial.quote}"</blockquote>
                     <footer>
@@ -233,8 +231,24 @@ export default function Home() {
                   </div>
                 ))}
               </div>
-            </MotionSection>
+            </div>
           </main>
+<div className="">
+  <span className="absolute top-[100vh] left-[70%] z-0 h-[100] lg:h-[500px] w-[100px] lg:w-[600px] border -translate-x-[50%] rounded-full bg-gradient-to-r from-violet-600/20 to-indigo-600/20 blur-3xl" />
+          <span className="absolute top-[150vh] left-[20%] z-0 h-[100] lg:h-[500px] w-[100px] lg:w-[600px] -translate-x-[50%] rounded-full bg-gradient-to-r from-red-600/20 to-green-600/20 blur-3xl" />
+          <span className="absolute top-[200vh] left-[50%] z-0 h-[100] lg:h-[500px] w-[100px] lg:w-[600px] -translate-x-[50%] rounded-full bg-gradient-to-r from-violet-600/20 to-indigo-600/20 blur-3xl" />
+          <span className="absolute top-[230vh] left-[70%] z-0 h-[100] lg:h-[500px] w-[100px] lg:w-[600px] -translate-x-[50%] rounded-full bg-gradient-to-r from-violet-600/20 to-indigo-600/20 blur-3xl" />
+          <span className="absolute top-[280vh] left-[10%] z-0 h-[100] lg:h-[500px] w-[100px] lg:w-[600px] -translate-x-[50%] rounded-full bg-gradient-to-r from-blue-600/20 to-indigo-600/20 blur-3xl" />
+
+</div>
+          
+
+
+          <div>
+            <NeuPricing />
+          </div>
+
+          <BasicFAQ />
   
           {/* Footer */}
           <footer className="bg-gray-100 dark:bg-gray-900 py-12">

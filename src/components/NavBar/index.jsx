@@ -41,13 +41,13 @@ const Navbar = () => {
         <span className="text-gray-600 dark:text-gray-300">Loading...</span>
       ) : user ? (
         <>
-          <Link to="/coach" className={`${navLinkClass} flex items-center text-gray-800 dark:text-gray-200`}>
+          <Link to="/coach" className={`${navLinkClass} flex items-center text-gray-200`}>
             <i className="fas fa-book mr-2" aria-hidden="true"></i>
             My Coach
           </Link>
           <Link 
             to="/profile" 
-            className={`${navLinkClass} flex items-center text-gray-800 dark:text-gray-200`}
+            className={`${navLinkClass} flex items-center text-gray-200`}
           >
             <span className="mr-2">
               Hello, {userData.firstName || user.email}
@@ -73,19 +73,19 @@ const Navbar = () => {
         <>
           <Link 
             to="/login" 
-            className={`${navLinkClass} text-gray-800 dark:text-gray-200`}
+            className={`${navLinkClass} text-gray-200`}
           >
             Login
           </Link>
           <Link 
             to="/signup" 
-            className={`${navLinkClass} text-gray-800 dark:text-gray-200`}
+            className={`${navLinkClass} text-gray-200`}
           >
             Sign Up
           </Link>
           <button
             onClick={toggleDarkMode}
-            className="p-2 text-gray-800 dark:text-gray-200 hover:scale-105 transition-transform duration-300 focus:outline-none"
+            className="p-2 text-gray-200 hover:scale-105 transition-transform duration-300 focus:outline-none"
             aria-label="Toggle dark mode"
           >
             {isDark ? '☀️' : '🌙'}
@@ -96,7 +96,7 @@ const Navbar = () => {
   );
 
   const MobileNavItems = () => (
-    <nav className={`fixed inset-0 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md z-40
+    <nav className={`fixed inset-0 bg-white/30 dark:bg-gray-900/50 backdrop-blur-md z-40
       flex flex-col items-center justify-center p-8 transition-transform duration-300
       ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}
     >
@@ -149,20 +149,20 @@ const Navbar = () => {
           <Link 
             to="/login" 
             onClick={toggleMenu} 
-            className={`${navLinkClass} text-xl py-4 text-gray-800 dark:text-gray-200`}
+            className={`${navLinkClass} text-xl py-4 text-gray-800`}
           >
             Login
           </Link>
           <Link 
             to="/signup" 
             onClick={toggleMenu} 
-            className={`${navLinkClass} text-xl py-4 text-gray-800 dark:text-gray-200`}
+            className={`${navLinkClass} text-xl py-4 text-gray-800`}
           >
             Sign Up
           </Link>
           <button 
             onClick={toggleDarkMode} 
-            className={`${navLinkClass} text-xl py-4 text-gray-800 dark:text-gray-200`}
+            className={`${navLinkClass} text-xl py-4 text-gray-800`}
           >
             {isDark ? 'Light Mode ☀️' : 'Dark Mode 🌙'}
           </button>
@@ -174,18 +174,18 @@ const Navbar = () => {
   return (
     <header className="fixed top-0 left-0 right-0 z-50 px-4 py-2">
       <div className="container mx-auto">
-        <div className="flex items-center justify-between bg-white/50 dark:bg-gray-800/50 
+        <div className="flex items-center justify-between bg-gray-800/50 dark:bg-gray-800/50 
           backdrop-blur-md rounded-lg shadow-lg p-4">
           <Link
             to="/"
             className="font-bold text-xl transform hover:scale-105 transition-transform 
-              duration-300 text-gray-900 dark:text-white focus:outline-none"
+              duration-300 text-white focus:outline-none"
           >
             4D Leader
           </Link>
 
           <button
-            className="md:hidden p-2 text-gray-800 dark:text-gray-200 transform 
+            className="md:hidden p-2 text-gray-100 dark:text-gray-200 transform 
               transition-transform duration-300 hover:scale-110"
             onClick={toggleMenu}
             aria-label="Toggle navigation menu"
