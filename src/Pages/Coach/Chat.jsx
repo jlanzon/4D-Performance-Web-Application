@@ -1,12 +1,14 @@
 import React, { useState, useRef, useEffect } from "react";
-import { auth, db, functions } from "../../firebase"; 
+import { auth, db, functions } from "../../firebase";
 import {
   collection,
   addDoc,
-  onSnapshot,
   query,
   orderBy,
   serverTimestamp,
+  limit,
+  getDocs,
+  startAfter,
 } from "firebase/firestore";
 import { doc, getDoc } from "firebase/firestore";
 import { httpsCallable } from "firebase/functions";
@@ -16,90 +18,158 @@ const Chat = () => {
   const [newMessage, setNewMessage] = useState("");
   const [coachDetails, setCoachDetails] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isFetchingMore, setIsFetchingMore] = useState(false);
+  const [lastDoc, setLastDoc] = useState(null);
+  const [hasMore, setHasMore] = useState(true);
+  const [totalMessages, setTotalMessages] = useState(0);
+  const [lastMessageId, setLastMessageId] = useState(null);
   const messagesEndRef = useRef(null);
+  const messagesContainerRef = useRef(null);
 
   const user = auth.currentUser;
   const chatId = user ? user.uid : null;
 
-  // Fetch coach details on mount
   useEffect(() => {
     const fetchCoachDetails = async () => {
-      if (!user) {
-        console.log("No user is signed in");
-        return;
-      }
+      if (!user) return;
       const docRef = doc(db, "coachDetails", user.uid);
       const docSnap = await getDoc(docRef);
-      if (docSnap.exists()) {
-        setCoachDetails(docSnap.data());
-      } else {
-        console.log("No coach details found");
-        setCoachDetails({ name: "Your AI Coach" }); // Fallback
-      }
+      setCoachDetails(docSnap.exists() ? docSnap.data() : { name: "Your AI Coach" });
     };
     fetchCoachDetails();
   }, [user]);
 
-  // Fetch and listen to messages from Firestore
   useEffect(() => {
     if (!chatId) return;
 
-    const messagesRef = collection(db, `chats/${chatId}/messages`);
-    const q = query(messagesRef, orderBy("timestamp", "asc"));
-
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const fetchedMessages = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setMessages(fetchedMessages);
-    }, (error) => {
-      console.error("Error fetching messages:", error);
-    });
-
-    return () => unsubscribe();
-  }, [chatId]);
-
-  // Scroll to the latest message
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
-
-  // Send message and get AI response
-  const handleSend = async () => {
-    if (newMessage.trim() === "" || !chatId) return;
-
-    const userMessage = {
-      text: newMessage,
-      sender: "user",
-      timestamp: serverTimestamp(),
+    const fetchInitialMessages = async () => {
+      const messagesRef = collection(db, `chats/${chatId}/messages`);
+      const q = query(messagesRef, orderBy("timestamp", "desc"), limit(10));
+      const snapshot = await getDocs(q);
+      const initialMessages = snapshot.docs
+        .map((doc) => ({ id: doc.id, ...doc.data() }))
+        .reverse();
+      setMessages(initialMessages);
+      if (snapshot.docs.length > 0) {
+        setLastDoc(snapshot.docs[snapshot.docs.length - 1]);
+      }
+      setHasMore(snapshot.docs.length === 10);
     };
 
-    // Add user message to Firestore
-    await addDoc(collection(db, `chats/${chatId}/messages`), userMessage);
+    const fetchTotalMessages = async () => {
+      const messagesRef = collection(db, `chats/${chatId}/messages`);
+      const snapshot = await getDocs(messagesRef);
+      setTotalMessages(snapshot.size);
+    };
+
+    fetchInitialMessages();
+    fetchTotalMessages();
+  }, [chatId]);
+
+  useEffect(() => {
+    if (messages.length > 0 && messages[messages.length - 1].id !== lastMessageId) {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      setLastMessageId(messages[messages.length - 1].id);
+    }
+  }, [messages]);
+
+  const handleScroll = async () => {
+    const container = messagesContainerRef.current;
+    if (!container || isFetchingMore || !hasMore) return;
+  
+    if (container.scrollTop === 0) {
+      setIsFetchingMore(true);
+      const previousHeight = container.scrollHeight;
+  
+      const messagesRef = collection(db, `chats/${chatId}/messages`);
+      const q = query(
+        messagesRef,
+        orderBy("timestamp", "desc"),
+        startAfter(lastDoc),
+        limit(10)
+      );
+      const snapshot = await getDocs(q);
+      const moreMessages = snapshot.docs
+        .map((doc) => ({ id: doc.id, ...doc.data() }))
+        .reverse();
+  
+      if (moreMessages.length > 0) {
+        setMessages((prev) => [...moreMessages, ...prev]);
+        setLastDoc(snapshot.docs[snapshot.docs.length - 1]);
+        setHasMore(snapshot.docs.length === 10);
+  
+        requestAnimationFrame(() => {
+          const newHeight = container.scrollHeight;
+          const heightDifference = newHeight - previousHeight;
+          container.scrollTop = heightDifference;
+        });
+      } else {
+        setHasMore(false);
+      }
+      setIsFetchingMore(false);
+    }
+  };
+
+  const handleSend = async () => {
+    if (!newMessage.trim() || !chatId) return;
+
+    const userMessage = { text: newMessage, sender: "user", timestamp: serverTimestamp() };
     setNewMessage("");
     setIsLoading(true);
 
     try {
-      const generateAIResponse = httpsCallable(functions, "generateAIResponse");
-      const { data } = await generateAIResponse({
-        messages: messages,
-        userMessage: newMessage,
-      });
+      // Add user message to Firestore
+      const userDocRef = await addDoc(collection(db, `chats/${chatId}/messages`), userMessage);
+      setTotalMessages((prev) => prev + 1);
 
-      // Add AI response to Firestore
+      // Fetch updated messages after adding user message
+      const messagesRef = collection(db, `chats/${chatId}/messages`);
+      const q = query(messagesRef, orderBy("timestamp", "desc"), limit(10));
+      const snapshot = await getDocs(q);
+      const updatedMessages = snapshot.docs
+        .map((doc) => ({ id: doc.id, ...doc.data() }))
+        .reverse();
+      setMessages(updatedMessages);
+      if (snapshot.docs.length > 0) {
+        setLastDoc(snapshot.docs[snapshot.docs.length - 1]);
+      }
+
+      // Generate and add AI response
+      const generateAIResponse = httpsCallable(functions, "generateAIResponse");
+      const { data } = await generateAIResponse({ messages: updatedMessages, userMessage: newMessage });
       await addDoc(collection(db, `chats/${chatId}/messages`), {
         text: data.response,
         sender: "coach",
         timestamp: serverTimestamp(),
       });
+      setTotalMessages((prev) => prev + 1);
+
+      // Fetch updated messages after AI response
+      const finalSnapshot = await getDocs(q);
+      const finalMessages = finalSnapshot.docs
+        .map((doc) => ({ id: doc.id, ...doc.data() }))
+        .reverse();
+      setMessages(finalMessages);
+      if (finalSnapshot.docs.length > 0) {
+        setLastDoc(finalSnapshot.docs[finalSnapshot.docs.length - 1]);
+      }
     } catch (error) {
       console.error("Error sending message:", error);
       await addDoc(collection(db, `chats/${chatId}/messages`), {
-        text: "Sorry, I couldn't process that. Please try again.",
+        text: "Oops, something went wrong. Try again?",
         sender: "coach",
         timestamp: serverTimestamp(),
       });
+      setTotalMessages((prev) => prev + 1);
+
+      // Fetch updated messages after error
+      const messagesRef = collection(db, `chats/${chatId}/messages`);
+      const q = query(messagesRef, orderBy("timestamp", "desc"), limit(10));
+      const snapshot = await getDocs(q);
+      const updatedMessages = snapshot.docs
+        .map((doc) => ({ id: doc.id, ...doc.data() }))
+        .reverse();
+      setMessages(updatedMessages);
     } finally {
       setIsLoading(false);
     }
@@ -113,78 +183,128 @@ const Chat = () => {
   };
 
   const formatTime = (timestamp) => {
-    if (!timestamp) return "";
-    const date = timestamp.toDate(); // Firestore timestamp to JS Date
-    return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    if (timestamp && typeof timestamp.toDate === "function") {
+      return timestamp.toDate().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    }
+    return ""; // Fallback for unresolved timestamps
   };
 
   if (!user) {
     return (
-      <div className="p-4 text-white bg-slate-900 min-h-screen">
-        <h1 className="text-3xl font-bold mb-4">Please sign in to chat</h1>
+      <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-2xl font-semibold text-gray-700 dark:text-gray-300">
+          Please sign in to start chatting
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="p-4 text-white bg-slate-900 min-h-screen">
-      <h1 className="text-3xl font-bold mb-4">Coach Chat</h1>
-      <h2 className="text-2xl mb-4">
-        Chatting with {coachDetails?.name || "Your AI Coach"}
-      </h2>
-      <div className="bg-slate-800 p-4 rounded mb-4 h-96 overflow-y-auto">
+    <div className="h-screen w-full bg-gray-100 dark:bg-gray-900 flex flex-col">
+      <header className="bg-white dark:bg-gray-800 shadow-sm p-4 sticky top-0 z-10">
+        <div className="mx-auto flex items-center justify-between">
+          <p className="text-sm font-semibold text-gray-900 dark:text-white">
+            {coachDetails?.name || "Chat with Your AI Coach"}
+          </p>
+          <div className="text-sm text-gray-500 dark:text-gray-400">
+            {totalMessages} messages
+          </div>
+        </div>
+      </header>
+
+      <div
+        ref={messagesContainerRef}
+        className="flex-1 overflow-y-auto w-full mx-auto p-4 space-y-6"
+        onScroll={handleScroll}
+      >
+        {isFetchingMore && (
+          <div className="text-center">
+            <div className="inline-block w-16 h-1 bg-gray-400 dark:bg-gray-600 rounded animate-pulse"></div>
+          </div>
+        )}
+        {!hasMore && messages.length > 0 && (
+          <div className="text-center text-gray-500 dark:text-gray-400">
+            No more messages
+          </div>
+        )}
+        {messages.length === 0 && !isLoading && (
+          <div className="text-center text-gray-500 dark:text-gray-400 mt-10">
+            Start the conversation below...
+          </div>
+        )}
         {messages.map((msg) => (
           <div
             key={msg.id}
-            className={`mb-2 flex ${
-              msg.sender === "coach" ? "justify-start" : "justify-end"
-            }`}
+            className={`flex ${msg.sender === "coach" ? "justify-start" : "justify-end"}`}
           >
             <div
-              className={`p-2 rounded ${
+              className={`max-w-[70%] rounded-lg p-3 shadow-sm ${
                 msg.sender === "coach"
-                  ? "bg-blue-100 text-blue-800"
-                  : "bg-green-100 text-green-800"
-              } flex flex-col max-w-[70%]`}
+                  ? "bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200"
+                  : "bg-blue-500 text-white"
+              }`}
             >
               {msg.sender === "coach" && (
-                <div className="text-sm font-bold text-gray-700">
+                <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
                   {coachDetails?.name || "AI Coach"}
                 </div>
               )}
-              <div className="whitespace-pre-wrap">{msg.text}</div>
-              <div className="text-xs text-gray-500 mt-1">
+              <div className="whitespace-pre-wrap text-sm">{msg.text}</div>
+              <div className="text-xs text-gray-400 dark:text-gray-500 mt-1">
                 {formatTime(msg.timestamp)}
               </div>
             </div>
           </div>
         ))}
         {isLoading && (
-          <div className="flex justify-start mb-2">
-            <div className="bg-blue-100 text-blue-800 p-2 rounded">
-              <div className="animate-pulse">Thinking...</div>
+          <div className="flex justify-start">
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-3 shadow-sm">
+              <div className="flex space-x-2 animate-pulse">
+                <div className="w-2 h-2 bg-gray-400 dark:bg-gray-600 rounded-full"></div>
+                <div className="w-2 h-2 bg-gray-400 dark:bg-gray-600 rounded-full"></div>
+                <div className="w-2 h-2 bg-gray-400 dark:bg-gray-600 rounded-full"></div>
+              </div>
             </div>
           </div>
         )}
         <div ref={messagesEndRef} />
       </div>
-      <div className="flex">
-        <textarea
-          value={newMessage}
-          onChange={(e) => setNewMessage(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder="Type your message... (Press Enter to send, Shift+Enter for new line)"
-          className="flex-grow p-2 rounded-l bg-slate-700 text-white border border-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[50px] max-h-[150px]"
-          rows={2}
-        />
-        <button
-          onClick={handleSend}
-          disabled={newMessage.trim() === "" || isLoading}
-          className="bg-blue-600 px-4 rounded-r hover:bg-blue-700 transition disabled:bg-blue-300 flex items-center"
-        >
-          {isLoading ? "Sending..." : "Send"}
-        </button>
-      </div>
+
+      <footer className="bg-white dark:bg-gray-800 shadow-lg p-2 sticky bottom-0">
+        <div className="max-w-4xl mx-auto flex gap-2">
+          <textarea
+            value={newMessage}
+            onChange={(e) => setNewMessage(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="Type your message..."
+            className="flex-1 p-3 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white 
+              border border-gray-200 dark:border-gray-600 focus:outline-none focus:ring-2 
+              focus:ring-blue-500 resize-none min-h-[60px] max-h-[120px] text-sm"
+            rows={2}
+          />
+          <button
+            onClick={handleSend}
+            disabled={newMessage.trim() === "" || isLoading}
+            className="px-4 py-6 bg-blue-500 text-white rounded-lg hover:bg-blue-600 
+              disabled:bg-gray-300 disabled:text-gray-500 transition-colors duration-200 
+              flex items-center self-end"
+          >
+            {isLoading ? (
+              <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+              </svg>
+            ) : (
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+              </svg>
+            )}
+          </button>
+        </div>
+        <div className="text-xs text-gray-400 dark:text-gray-500 text-center mt-2">
+          Press Enter to send, Shift+Enter for new line
+        </div>
+      </footer>
     </div>
   );
 };

@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { DarkModeProvider } from './context/Theme'; 
 import Home from './Pages/Home';
 import Login from './Pages/Login';
@@ -11,7 +11,6 @@ import Unauthorized from './components/Unauthorized';
 import ProtectedRoute from './components/ProtectedRoute';
 import RoleProtectedRoute from './components/RoleProtectedRoute';
 import Navbar from './components/NavBar';
-
 import CoachLayout from './Pages/Coach/CoachLayout';
 import Chat from './Pages/Coach/Chat';
 import Settings from './Pages/Coach/Settings';
@@ -22,71 +21,85 @@ import BlogList from './Pages/Coach/Blog/BlogList';
 import BlogCreate from './Pages/Coach/Blog/BlogCreate';
 import BlogView from './Pages/Coach/Blog/BlogView';
 
+// Wrapper component to conditionally render Navbar
+const Layout = ({ children }) => {
+  const location = useLocation();
+  const isCoachRoute = location.pathname.startsWith('/coach');
+
+  return (
+    <>
+      {!isCoachRoute && <Navbar />}
+      {children}
+    </>
+  );
+};
+
 function App() {
   return (
     <DarkModeProvider>
       <Router>
-        <Navbar />
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/scorecard" element={<Scorecard />} />
-          <Route
-            path="/profile"
-            element={
-              <ProtectedRoute>
-                <Profile />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin"
-            element={
-              <RoleProtectedRoute allowedRoles={["admin"]}>
-                <AdminPage />
-              </RoleProtectedRoute>
-            }
-          />
-          <Route path="/unauthorized" element={<Unauthorized />} />
+        <Layout>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/scorecard" element={<Scorecard />} />
+            <Route
+              path="/profile"
+              element={
+                <ProtectedRoute>
+                  <Profile />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin"
+              element={
+                <RoleProtectedRoute allowedRoles={["admin"]}>
+                  <AdminPage />
+                </RoleProtectedRoute>
+              }
+            />
+            <Route path="/unauthorized" element={<Unauthorized />} />
 
-          <Route
-  path="/coach"
-  element={
-    <ProtectedRoute>
-      <CoachLayout />
-    </ProtectedRoute>
-  }
->
-  <Route
-    path="chat"
-    element={
-      <RoleProtectedRoute
-        allowedRoles={[
-          "Premium",
-          "Super User",
-          "Platinum User",
-          "Tester",
-          "Admin",
-          "Manager",
-          "Moderator",
-          "Contributor",
-          "admin"
-        ]}
-      >
-        <Chat />
-      </RoleProtectedRoute>
-    }
-  />
-  <Route path="settings" element={<Settings />} />
-  <Route path="daily-checkin" element={<DailyCheckIn />} />
-  <Route path="blog" element={<BlogLayout />}>
-    <Route path="list" element={<BlogList />} />
-    <Route path="create" element={<BlogCreate />} />
-    <Route path=":blogId" element={<BlogView />} />
-  </Route>
-</Route>
-        </Routes>
+            <Route
+              path="/coach"
+              element={
+                <ProtectedRoute>
+                  <CoachLayout />
+                </ProtectedRoute>
+              }
+            >
+              <Route
+                path="chat"
+                element={
+                  <RoleProtectedRoute
+                    allowedRoles={[
+                      "Premium",
+                      "Super User",
+                      "Platinum User",
+                      "Tester",
+                      "Admin",
+                      "Manager",
+                      "Moderator",
+                      "Contributor",
+                      "admin"
+                    ]}
+                  >
+                    <Chat />
+                  </RoleProtectedRoute>
+                }
+              />
+              <Route path="settings" element={<Settings />} />
+              <Route path="daily-checkin" element={<DailyCheckIn />} />
+              <Route path="blog" element={<BlogLayout />}>
+                <Route path="list" element={<BlogList />} />
+                <Route path="create" element={<BlogCreate />} />
+                <Route path=":blogId" element={<BlogView />} />
+              </Route>
+            </Route>
+          </Routes>
+        </Layout>
       </Router>
     </DarkModeProvider>
   );
