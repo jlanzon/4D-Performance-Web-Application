@@ -8,9 +8,9 @@ export const NeuPricing = () => {
   const [selected, setSelected] = useState("annual");
 
   return (
-    <motion.section
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
+    <div
+      // initial={{ opacity: 0, y: 20 }}
+      // whileInView={{ opacity: 1, y: 0 }}
       className={`py-24 ${isDark ? "bg-gray-900" : "bg-gray-100"}`}
     >
       <div className="mx-auto max-w-7xl px-6">
@@ -65,7 +65,7 @@ export const NeuPricing = () => {
           />
         </div>
       </div>
-    </motion.section>
+    </div>
   );
 };
 

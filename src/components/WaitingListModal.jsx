@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { Children, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { collection, addDoc } from 'firebase/firestore';
 import { db } from '../firebase';
+import { FiArrowRight } from 'react-icons/fi';
 
-const WaitingListModal = () => {
+const WaitingListModal = ({disableButton, border, boxShadow}) => {
   const [isOpen, setIsOpen] = useState(false);
   const [email, setEmail] = useState('');
   const [submitted, setSubmitted] = useState(false);
@@ -35,12 +36,25 @@ const WaitingListModal = () => {
   return (
     <>
       {/* Trigger Button */}
-      <button
+
+      {disableButton === true ? <><motion.a
+                      // href="/signup"
+                      style={ {border, boxShadow} }
+                      onClick={openModal}
+
+                      whileHover={{ scale: 1.015 }}
+                      whileTap={{ scale: 0.985 }}
+                      className="group flex items-center gap-2 rounded-full bg-gray-950/10 px-6 py-3 text-gray-50 transition-colors hover:bg-gray-950/20 dark:hover:bg-gray-950/50"
+                    >
+                      <div className="mx-auto">Join the waiting list!</div>
+                      <FiArrowRight className="transition-transform group-hover:-rotate-45 group-active:-rotate-12" />
+                    </motion.a></> : <><button
         onClick={openModal}
         className="rounded-md bg-indigo-600 dark:bg-indigo-500 px-3.5 py-2.5 text-sm font-semibold text-white dark:text-stone-100 shadow-xs hover:bg-indigo-700 dark:hover:bg-indigo-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 dark:focus-visible:outline-indigo-500"
       >
         Join Waiting List
-      </button>
+      </button></>}
+      
 
       {/* Modal */}
       <AnimatePresence>
