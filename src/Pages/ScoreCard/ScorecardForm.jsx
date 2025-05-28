@@ -7,11 +7,11 @@ import { scorecardData } from './scorecardData';
 
 const ScorecardForm = ({ onSubmit }) => {
   const { isDark } = useContext(DarkModeContext);
-  const [isSimpleMode, setIsSimpleMode] = useState(false); // Toggle state for Simple/Complex mode
+  const [isSimpleMode, setIsSimpleMode] = useState(false);
 
   const initialAnswers = Object.entries(scorecardData).reduce((acc, [category, data]) => {
     data.questions.forEach((_, index) => {
-      acc[`${category}${index + 1}`] = 3; // Default to Neutral (3)
+      acc[`${category}${index + 1}`] = 5; // Default to 5 (middle of 0–10)
     });
     return acc;
   }, {});
@@ -29,12 +29,12 @@ const ScorecardForm = ({ onSubmit }) => {
 
   const getFeedbackText = (category, average) => {
     const feedback = scorecardData[category].feedback;
-    return average < 3 ? feedback.low : feedback.high;
+    return average < 5 ? feedback.low : feedback.high; // Adjusted for 0–10 scale
   };
 
   const getColorClass = (average) => {
-    if (average <= 2.0) return 'text-red-600';
-    if (average < 4.0) return 'text-yellow-600';
+    if (average <= 4.0) return 'text-red-600'; // Adjusted for 0–10
+    if (average < 8.0) return 'text-yellow-600';
     return 'text-green-600';
   };
 
@@ -66,7 +66,7 @@ const ScorecardForm = ({ onSubmit }) => {
     };
 
     setFeedback(feedbackData);
-    onSubmit(categoryAverages); // Pass category averages to parent component
+    onSubmit(categoryAverages);
   };
 
   const handleChange = (e) => {
@@ -119,7 +119,7 @@ const ScorecardForm = ({ onSubmit }) => {
               {category} Intelligence
             </h2>
             {data.questions
-              .slice(0, isSimpleMode ? 2 : data.questions.length) // Show only first 2 questions in Simple mode
+              .slice(0, isSimpleMode ? 2 : data.questions.length)
               .map((question, index) => (
                 <div key={index} className="mb-6">
                   <label
@@ -132,8 +132,8 @@ const ScorecardForm = ({ onSubmit }) => {
                     <input
                       type="range"
                       id={`input-${category}${index + 1}`}
-                      min="1"
-                      max="5"
+                      min="0" // Changed to 0
+                      max="10" // Changed to 10
                       step="1"
                       name={`${category}${index + 1}`}
                       value={answers[`${category}${index + 1}`]}
@@ -180,14 +180,14 @@ const ScorecardForm = ({ onSubmit }) => {
             Your 4D Leadership Intelligence Profile
           </h2>
           <p className={`text-lg md:text-xl mb-6 font-semibold ${getColorClass(feedback.overall)}`}>
-            Overall Score: {feedback.overall}/5
+            Overall Score: {feedback.overall}/10
           </p>
           {Object.entries(feedback)
             .filter(([key]) => key !== 'overall')
             .map(([category, data]) => (
               <div key={category} className="mb-6">
                 <h3 className={`text-xl md:text-2xl font-semibold capitalize ${getColorClass(data.average)}`}>
-                  {category} Intelligence: {data.average}/5
+                  {category} Intelligence: {data.average}/10
                 </h3>
                 <p className={`mt-2 text-base md:text-lg ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                   {data.feedbackText}

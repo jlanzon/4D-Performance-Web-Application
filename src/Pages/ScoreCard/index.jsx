@@ -32,14 +32,11 @@ const Scorecard = () => {
   const border = useMotionTemplate`1px solid ${color}`;
   const boxShadow = useMotionTemplate`0px 4px 24px ${color}`;
 
-  const handleSubmit = (answers) => {
-    const cognitive = ((answers.cognitive1 + answers.cognitive2) / 2).toFixed(1);
-    const physical = ((answers.physical1 + answers.physical2) / 2).toFixed(1);
-    const emotional = ((answers.emotional1 + answers.emotional2) / 2).toFixed(1);
-    const spiritual = ((answers.spiritual1 + answers.spiritual2) / 2).toFixed(1);
-    setScores({ cognitive, physical, emotional, spiritual });
-    setSubmitted(true);
-  };
+const handleSubmit = (categoryAverages) => {
+  setScores(categoryAverages);  // categoryAverages already has the four numbers you want
+  setSubmitted(true);
+};
+
 
   const retakeQuiz = () => {
     setSubmitted(false);
