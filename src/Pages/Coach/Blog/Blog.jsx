@@ -81,39 +81,47 @@ const Blog = () => {
       <h1 className="text-3xl font-bold mb-4">Coach Blog</h1>
       {error && <p className="text-red-500">{error}</p>}
       {message && <p className="text-green-500">{message}</p>}
-      <div className="mb-6">
-        {blogs.map((blog) => (
-          <div key={blog.id} className="mb-4 p-4 bg-slate-800 rounded">
-            <h2 className="text-xl font-bold">{blog.title}</h2>
-            <p className="text-gray-300">{blog.content}</p>
-            <p className="text-gray-500 text-sm">By {blog.author}</p>
-          </div>
-        ))}
+      <h2 className="text-2xl font-semibold mb-2">Recent Blog Posts</h2>
+      <div className="mb-8">
+        {blogs.length === 0 ? (
+          <p className="text-gray-400">No blog posts yet.</p>
+        ) : (
+          blogs.map((blog) => (
+            <div key={blog.id} className="mb-4 p-4 bg-slate-800 rounded">
+              <h3 className="text-xl font-bold">{blog.title}</h3>
+              <p className="text-gray-300">{blog.content}</p>
+              <p className="text-gray-500 text-sm">By {blog.author}</p>
+            </div>
+          ))
+        )}
       </div>
-      {canPost ? (
-        <form onSubmit={handlePostBlog} className="max-w-md">
-          <input
-            type="text"
-            value={newBlogTitle}
-            onChange={(e) => setNewBlogTitle(e.target.value)}
-            placeholder="Blog Title"
-            className="w-full p-2 mb-2 rounded bg-slate-700 text-white"
-            required
-          />
-          <textarea
-            value={newBlogContent}
-            onChange={(e) => setNewBlogContent(e.target.value)}
-            placeholder="Write your blog here..."
-            className="w-full p-2 mb-2 rounded bg-slate-700 text-white"
-            required
-          />
-          <button type="submit" className="bg-blue-600 p-2 rounded hover:bg-blue-700">
-            Post Blog
-          </button>
-        </form>
-      ) : (
-        <p className="text-gray-400">You are not authorised to post blogs.</p>
-      )}
+      <div className="mt-8">
+        {canPost ? (
+          <form onSubmit={handlePostBlog} className="max-w-md bg-slate-800 p-4 rounded shadow-lg">
+            <h2 className="text-lg font-semibold mb-2">Create a New Blog Post</h2>
+            <input
+              type="text"
+              value={newBlogTitle}
+              onChange={(e) => setNewBlogTitle(e.target.value)}
+              placeholder="Blog Title"
+              className="w-full p-2 mb-2 rounded bg-slate-700 text-white"
+              required
+            />
+            <textarea
+              value={newBlogContent}
+              onChange={(e) => setNewBlogContent(e.target.value)}
+              placeholder="Write your blog here..."
+              className="w-full p-2 mb-2 rounded bg-slate-700 text-white"
+              required
+            />
+            <button type="submit" className="bg-blue-600 p-2 rounded hover:bg-blue-700">
+              Post Blog
+            </button>
+          </form>
+        ) : (
+          <p className="text-gray-400">You are not authorised to post blogs.</p>
+        )}
+      </div>
     </div>
   );
 };

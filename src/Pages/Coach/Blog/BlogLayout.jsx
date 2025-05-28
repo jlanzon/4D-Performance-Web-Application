@@ -75,7 +75,7 @@ const BlogLayout = () => {
         <Outlet />
       </main>
       <footer className="bg-slate-800 p-4 text-center text-gray-400 text-sm">
-        © {new Date().getFullYear()} Blog Platform. All rights reserved.
+        © {new Date().getFullYear()} 4D Leader Blogging. All rights reserved.
       </footer>
     </div>
   );
