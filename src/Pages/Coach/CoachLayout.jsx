@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { FaHouse } from 'react-icons/fa6';
 import { Outlet, Link, useLocation, Navigate } from 'react-router-dom';
 
 const CoachLayout = () => {
@@ -12,10 +13,12 @@ const CoachLayout = () => {
     { to: 'daily-checkin', label: 'Daily Check-In', icon: 'M5 13l4 4L19 7' },
     { to: 'blog/list', label: 'Blog', icon: 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5s3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18s-3.332.477-4.5 1.253' },
     { to: 'settings', label: 'Settings', icon: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37 1 .608 2.296.07 2.572-1.065z' },
+    { to: '/', label: 'Home', icon: <FaHouse />, otherIcon: true}
+
   ];
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white flex pt-20">
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white flex">
       {/* Sidebar */}
       <aside
         className={`fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-gray-800 shadow-lg transform 
@@ -35,14 +38,17 @@ const CoachLayout = () => {
                 className={`flex items-center gap-3 p-3 rounded-lg text-sm font-medium 
                   transition-colors duration-200
                   ${
-                    location.pathname.includes(item.to)
+                    item.to !== '/' && location.pathname.includes(item.to)
                       ? 'bg-blue-500 text-white'
                       : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
                   }`}
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                {item.otherIcon ? (
+                  <span className="text-xl">{item.icon}</span>) : (<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={item.icon} />
                 </svg>
+                )}
+                
                 {item.label}
               </Link>
             ))}
