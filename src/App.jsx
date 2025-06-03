@@ -21,18 +21,13 @@ import BlogList from './Pages/Coach/Blog/BlogList';
 import BlogCreate from './Pages/Coach/Blog/BlogCreate';
 import BlogView from './Pages/Coach/Blog/BlogView';
 
-// Wrapper component to conditionally render Navbar
-const Layout = ({ children }) => {
-  const location = useLocation();
-  const isCoachRoute = location.pathname.startsWith('/coach');
-
-  return (
-    <>
-      {!isCoachRoute && <Navbar />}
-      {children}
-    </>
-  );
-};
+// Layout component used to wrap all routes with the common Navbar
+const Layout = ({ children }) => (
+  <>
+    <Navbar />
+    {children}
+  </>
+);
 
 function App() {
   return (
