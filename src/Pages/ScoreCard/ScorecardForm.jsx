@@ -8,6 +8,7 @@ import { scorecardData } from './scorecardData';
 const ScorecardForm = ({ onSubmit }) => {
   const { isDark } = useContext(DarkModeContext);
   const [isSimpleMode, setIsSimpleMode] = useState(false);
+  const [skipped, setSkipped] = useState({});
 
   const initialAnswers = Object.entries(scorecardData).reduce((acc, [category, data]) => {
     data.questions.forEach((_, index) => {
@@ -21,19 +22,19 @@ const ScorecardForm = ({ onSubmit }) => {
 
   const calculateAverage = (category) => {
     const categoryAnswers = Object.entries(answers)
-      .filter(([key]) => key.startsWith(category))
+      .filter(([key]) => key.startsWith(category) && !skipped[key])
       .map(([_, value]) => value);
     const sum = categoryAnswers.reduce((acc, val) => acc + val, 0);
-    return sum / categoryAnswers.length;
+    return categoryAnswers.length ? (sum / categoryAnswers.length).toFixed(1) : 0;
   };
 
   const getFeedbackText = (category, average) => {
     const feedback = scorecardData[category].feedback;
-    return average < 5 ? feedback.low : feedback.high; // Adjusted for 0–10 scale
+    return average < 5 ? feedback.low : feedback.high;
   };
 
   const getColorClass = (average) => {
-    if (average <= 4.0) return 'text-red-600'; // Adjusted for 0–10
+    if (average <= 4.0) return 'text-red-600';
     if (average < 8.0) return 'text-yellow-600';
     return 'text-green-600';
   };
@@ -41,14 +42,32 @@ const ScorecardForm = ({ onSubmit }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     const categories = Object.keys(scorecardData);
-    const categoryAverages = {};
+    const categoryData = {};
 
     categories.forEach((category) => {
-      categoryAverages[category] = calculateAverage(category).toFixed(1);
+      const categoryAnswers = Object.entries(answers)
+        .filter(([key]) => key.startsWith(category))
+        .reduce((acc, [key, value]) => {
+          acc[key] = value;
+          return acc;
+        }, {});
+      const skippedQuestions = Object.entries(skipped)
+        .filter(([key]) => key.startsWith(category))
+        .reduce((acc, [key, value]) => {
+          acc[key] = value;
+          return acc;
+        }, {});
+      categoryData[category] = {
+        score: calculateAverage(category),
+        answers: categoryAnswers,
+        skipped: skippedQuestions,
+      };
     });
 
     const overallAverage = (
-      Object.values(categoryAverages).reduce((acc, avg) => acc + parseFloat(avg), 0) /
+      Object.values(categoryData)
+        .filter((data) => parseFloat(data.score) > 0)
+        .reduce((acc, data) => acc + parseFloat(data.score), 0) /
       categories.length
     ).toFixed(1);
 
@@ -58,15 +77,15 @@ const ScorecardForm = ({ onSubmit }) => {
         categories.map((category) => [
           category,
           {
-            average: categoryAverages[category],
-            feedbackText: getFeedbackText(category, categoryAverages[category]),
+            average: categoryData[category].score,
+            feedbackText: getFeedbackText(category, categoryData[category].score),
           },
         ])
       ),
     };
 
     setFeedback(feedbackData);
-    onSubmit(categoryAverages);
+    onSubmit(categoryData);
   };
 
   const handleChange = (e) => {
@@ -79,8 +98,12 @@ const ScorecardForm = ({ onSubmit }) => {
     setIsSimpleMode((prev) => !prev);
   };
 
+  const handleSkip = (key) => {
+    setSkipped((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
+
   return (
-    <div className="w-full relative">
+    <div className="w-full relative z-[1000]">
       {/* Toggle Switch */}
       <div className="absolute top-0 right-0 flex items-center space-x-2">
         <span className={`text-sm font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
@@ -120,38 +143,64 @@ const ScorecardForm = ({ onSubmit }) => {
             </h2>
             {data.questions
               .slice(0, isSimpleMode ? 2 : data.questions.length)
-              .map((question, index) => (
-                <div key={index} className="mb-6">
-                  <label
-                    htmlFor={`input-${category}${index + 1}`}
-                    className={`block mb-2 text-base md:text-lg ${isDark ? 'text-gray-200' : 'text-gray-800'}`}
-                  >
-                    {question}
-                  </label>
-                  <div className="flex items-center">
-                    <input
-                      type="range"
-                      id={`input-${category}${index + 1}`}
-                      min="0" // Changed to 0
-                      max="10" // Changed to 10
-                      step="1"
-                      name={`${category}${index + 1}`}
-                      value={answers[`${category}${index + 1}`]}
-                      onChange={handleChange}
-                      className={`w-full h-2 rounded-lg appearance-none cursor-pointer ${
-                        isDark ? 'bg-gray-700' : 'bg-gray-200'
-                      }`}
-                    />
-                    <span className={`ml-4 text-lg font-medium ${isDark ? 'text-gray-200' : 'text-gray-800'}`}>
-                      {answers[`${category}${index + 1}`]}
-                    </span>
+              .map((question, index) => {
+                const key = `${category}${index + 1}`;
+                const isSkipped = skipped[key];
+                return (
+                  <div key={index} className="mb-6">
+                    <label
+                      htmlFor={`input-${key}`}
+                      className={`block mb-2 text-base md:text-lg ${isDark ? 'text-gray-200' : 'text-gray-800'}`}
+                    >
+                      {question}
+                    </label>
+                    <div className="flex items-center gap-4">
+                      {isSkipped ? (
+                        <div className="flex-1 text-gray-400 italic">Skipped</div>
+                      ) : (
+                        <>
+                          <input
+                            type="range"
+                            id={`input-${key}`}
+                            min="0"
+                            max="10"
+                            step="1"
+                            name={key}
+                            value={answers[key]}
+                            onChange={handleChange}
+                            className={`w-full h-2 rounded-lg appearance-none cursor-pointer ${
+                              isDark ? 'bg-gray-700' : 'bg-gray-200'
+                            }`}
+                            disabled={isSkipped}
+                          />
+                          <span className={`ml-2 text-lg font-medium ${isDark ? 'text-gray-200' : 'text-gray-800'}`}>
+                            {answers[key]}
+                          </span>
+                        </>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => handleSkip(key)}
+                        className={`ml-2 px-3 py-1 rounded text-sm font-semibold border ${
+                          isSkipped
+                            ? isDark
+                              ? 'bg-blue-700 text-white border-blue-600 hover:bg-blue-600'
+                              : 'bg-blue-200 text-blue-800 border-blue-400 hover:bg-blue-300'
+                            : isDark
+                            ? 'bg-gray-700 text-gray-200 border-gray-600 hover:bg-gray-600'
+                            : 'bg-gray-200 text-gray-800 border-gray-400 hover:bg-gray-300'
+                        }`}
+                      >
+                        {isSkipped ? 'Unskip' : 'Skip'}
+                      </button>
+                    </div>
+                    <div className="flex justify-between text-sm text-gray-500 dark:text-gray-400 mt-1">
+                      <span>Strongly Disagree</span>
+                      <span>Strongly Agree</span>
+                    </div>
                   </div>
-                  <div className="flex justify-between text-sm text-gray-500 dark:text-gray-400 mt-1">
-                    <span>Strongly Disagree</span>
-                    <span>Strongly Agree</span>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
           </motion.div>
         ))}
         <motion.button

@@ -1,9 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { auth, db } from "../../firebase";
 import { doc, getDoc, setDoc, deleteDoc, collection, query, getDocs } from "firebase/firestore";
 import { Check, X, User, Briefcase, Mic, Trash2, Clock } from "react-feather";
+import { ModelNameContext } from '../../context/ModelName';
 
 const Settings = () => {
+  const { modelName, setModelName } = useContext(ModelNameContext);
   const [coachDetails, setCoachDetails] = useState({
     name: "",
     specialisation: "",
@@ -198,6 +200,23 @@ const Settings = () => {
               {coachDetails.isAvailable ? "Available" : "Unavailable"}
             </span>
           </div>
+        </div>
+
+        {/* AI Model Name */}
+        <div className="mb-6">
+          <label className="text-gray-700 dark:text-gray-200 font-semibold mb-2 flex items-center">
+            <User className="w-4 h-4 mr-2" /> Coach Name (AI Model Name)
+          </label>
+          <input
+            type="text"
+            className="w-full p-2 border border-gray-300 dark:border-gray-700 rounded bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={modelName}
+            onChange={e => setModelName(e.target.value)}
+            placeholder="Enter your AI model's name"
+            minLength={3}
+            maxLength={32}
+          />
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">This name will be used for your AI coach in chat.</p>
         </div>
       </div>
 

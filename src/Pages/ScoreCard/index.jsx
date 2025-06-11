@@ -4,6 +4,7 @@ import { Stars } from '@react-three/drei';
 import { Canvas } from '@react-three/fiber';
 import ScorecardForm from './ScorecardForm';
 import ScorecardFeedback from './ScorecardFeedback';
+import WaitingListModal from './WaitingListModal';
 import { DarkModeContext } from '../../context/Theme';
 
 const COLORS_TOP = ["#13FFAA", "#1E67C6", "#CE84CF", "#DD335C"];
@@ -16,6 +17,7 @@ const Scorecard = () => {
   const { isDark } = useContext(DarkModeContext);
   const [submitted, setSubmitted] = useState(false);
   const [scores, setScores] = useState({});
+  const [showModal, setShowModal] = useState(false);
   const color = useMotionValue(COLORS_TOP[0]);
 
   useEffect(() => {
@@ -32,15 +34,16 @@ const Scorecard = () => {
   const border = useMotionTemplate`1px solid ${color}`;
   const boxShadow = useMotionTemplate`0px 4px 24px ${color}`;
 
-const handleSubmit = (categoryAverages) => {
-  setScores(categoryAverages);  // categoryAverages already has the four numbers you want
-  setSubmitted(true);
-};
-
+  const handleSubmit = (categoryData) => {
+    setScores(categoryData);
+    setSubmitted(true);
+    setShowModal(true); // Show popup on submission
+  };
 
   const retakeQuiz = () => {
     setSubmitted(false);
     setScores({});
+    setShowModal(false);
   };
 
   return (
@@ -82,7 +85,7 @@ const handleSubmit = (categoryAverages) => {
       <main className="relative -mt-20 rounded-t-[3rem] pt-20 bg-gray-100 dark:bg-gray-900">
         <div className="container mx-auto px-6 py-16">
           <div
-            className={`w-full max-w-4xl mx-auto rounded-2xl shadow-xl p-8 ${
+            className={`w-full max-w-7xl mx-auto rounded-2xl shadow-xl p-8 ${
               isDark
                 ? 'bg-gray-800 border border-gray-700'
                 : 'bg-white border border-gray-200'
@@ -97,12 +100,12 @@ const handleSubmit = (categoryAverages) => {
         </div>
       </main>
 
-      {/* Decorative Background Elements */}
-      <div>
-        <span className="absolute top-[80vh] left-[70%] -z-10 h-[100px] lg:h-[500px] w-[100px] lg:w-[600px] -translate-x-[50%] rounded-full bg-gradient-to-r from-violet-600/20 to-indigo-600/20 blur-3xl" />
-        <span className="absolute top-[120vh] left-[20%] -z-10 h-[100px] lg:h-[500px] w-[100px] lg:w-[600px] -translate-x-[50%] rounded-full bg-gradient-to-r from-red-600/20 to-green-600/20 blur-3xl" />
-        <span className="absolute top-[160vh] left-[50%] -z-10 h-[100px] lg:h-[500px] w-[100px] lg:w-[600px] -translate-x-[50%] rounded-full bg-gradient-to-r from-violet-600/20 to-indigo-600/20 blur-3xl" />
-      </div>
+      {/* Waiting List Modal */}
+      {showModal && (
+        <WaitingListModal onClose={() => setShowModal(false)} />
+      )}
+
+    
 
       {/* Footer */}
       <footer className="bg-gray-100 dark:bg-gray-900 py-12">

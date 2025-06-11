@@ -108,8 +108,8 @@ const WaitingList = () => {
 
       {/* Decorative Background Elements */}
       <div>
-        <span className="absolute top-[30vh] left-[70%] z-0 h-[100px] lg:h-[500px] w-[100px] lg:w-[600px] -translate-x-[50%] rounded-full bg-gradient-to-r from-violet-600/20 to-indigo-600/20 blur-3xl" />
-        <span className="absolute top-[70vh] left-[20%] z-0 h-[100px] lg:h-[500px] w-[100px] lg:w-[600px] -translate-x-[50%] rounded-full bg-gradient-to-r from-red-600/20 to-green-600/20 blur-3xl" />
+        <span className="absolute top-[30vh] left-[70%] -z-10 h-[100px] lg:h-[500px] w-[100px] lg:w-[600px] -translate-x-[50%] rounded-full bg-gradient-to-r from-violet-600/20 to-indigo-600/20 blur-3xl" />
+        <span className="absolute top-[70vh] left-[20%] -z-10 h-[100px] lg:h-[500px] w-[100px] lg:w-[600px] -translate-x-[50%] rounded-full bg-gradient-to-r from-red-600/20 to-green-600/20 blur-3xl" />
       </div>
     </div>
   );

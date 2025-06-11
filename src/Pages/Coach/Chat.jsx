@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useContext } from "react";
 import { auth, db, functions } from "../../firebase";
 import {
   collection,
@@ -12,6 +12,7 @@ import {
 } from "firebase/firestore";
 import { doc, getDoc } from "firebase/firestore";
 import { httpsCallable } from "firebase/functions";
+import { ModelNameContext } from "../../context/ModelName";
 
 const Chat = () => {
   const [messages, setMessages] = useState([]);
@@ -28,6 +29,8 @@ const Chat = () => {
 
   const user = auth.currentUser;
   const chatId = user ? user.uid : null;
+
+  const { modelName } = useContext(ModelNameContext);
 
   useEffect(() => {
     const fetchCoachDetails = async () => {
@@ -204,7 +207,7 @@ const Chat = () => {
       <header className="bg-white dark:bg-gray-800 shadow-sm p-4 sticky top-0 z-10">
         <div className="mx-auto flex items-center justify-between">
           <p className="text-sm font-semibold text-gray-900 dark:text-white">
-            {coachDetails?.name || "Chat with Your AI Coach"}
+            {coachDetails?.name || modelName || "Chat with Your AI Coach"}
           </p>
           <div className="text-sm text-gray-500 dark:text-gray-400">
             {totalMessages} messages
@@ -246,7 +249,7 @@ const Chat = () => {
             >
               {msg.sender === "coach" && (
                 <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
-                  {coachDetails?.name || "AI Coach"}
+                  {coachDetails?.name || modelName || "AI Coach"}
                 </div>
               )}
               <div className="whitespace-pre-wrap text-sm">{msg.text}</div>
