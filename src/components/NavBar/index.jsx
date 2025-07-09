@@ -176,11 +176,18 @@ const Navbar = () => {
       <div className="container mx-auto">
         <div className="flex items-center justify-between bg-gray-800/50 dark:bg-gray-800/50 
           backdrop-blur-md rounded-lg shadow-lg p-4">
+            
           <Link
             to="/"
-            className="font-bold text-xl transform hover:scale-105 transition-transform 
+            className="font-bold text-xl flex gap-2 transform hover:scale-105 transition-transform 
               duration-300 text-white focus:outline-none"
           >
+            <img
+              src="./logonoBG.png"
+              alt="4D Leader Logo"
+
+              className="h-8 w-8 object-contain"
+            />
             4D Leader
           </Link>
 
