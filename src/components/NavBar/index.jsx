@@ -172,7 +172,7 @@ const Navbar = () => {
   );
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 px-4 py-2">
+    <header className="fixed top-0 left-0 right-0 z-[9999] px-4 py-2">
       <div className="container mx-auto">
         <div className="flex items-center justify-between bg-gray-800/50 dark:bg-gray-800/50 
           backdrop-blur-md rounded-lg shadow-lg p-4">
