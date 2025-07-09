@@ -111,6 +111,16 @@ export default function Home() {
           className="relative grid min-h-screen place-content-center overflow-hidden px-6 py-24"
         >
           <div className="relative z-10 flex flex-col items-center">
+            
+            <motion.img
+              src="./logonoBG.png"
+              alt="4D Leader Logo"
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.1, duration: 0.6 }}
+              className="mb-6 h-32 w-32 object-contain"
+            />
+            
             <motion.span
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
