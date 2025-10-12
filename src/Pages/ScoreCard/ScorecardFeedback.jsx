@@ -6,6 +6,9 @@ import { FiArrowRight } from 'react-icons/fi';
 import WaitingListModal from '../../components/WaitingListModal';
 import ScorecardBarChart from './ScorecardBarChart';
 import ScorecardAnalytics from './ScorecardAnalytics';
+import { printReport } from '../../utils/printReport';
+import PrintableScoreCard from './PrintableScoreCard';
+
 
 const ScorecardFeedback = ({ scores, onRetake }) => {
   const { isDark } = useContext(DarkModeContext);
@@ -19,6 +22,11 @@ const ScorecardFeedback = ({ scores, onRetake }) => {
   const isComplex = Object.values(scores).every(
     (val) => typeof val === 'object' && 'score' in val
   );
+
+  const printClicked = () => {
+    printReport('#printable-scorecard-root', '4D-Leadership-Score.pdf');
+    toggleHiddenPDF(true);
+  };
 
   const averageScore = isComplex
     ? (
@@ -41,11 +49,30 @@ const ScorecardFeedback = ({ scores, onRetake }) => {
   const categories = Object.keys(scores);
 
   return (
-    <div
-      className={`p-8 rounded-2xl shadow-xl ${
-        isDark ? 'bg-gray-800 border border-gray-700' : 'bg-white border border-gray-200'
-      }`}
-    >
+   <div
+  id="scorecard-print-root"
+  className={`p-8 rounded-2xl shadow-xl ${
+    isDark ? 'bg-gray-800 border border-gray-700' : 'bg-white border border-gray-200'
+  }`}
+>
+ <div
+  style={{
+    position: 'fixed',
+    left: '-10000px',
+    top: 0,
+    width: '794px',         // A4 width at 96 DPI
+    background: '#fff',
+    padding: 0,
+    margin: 0,
+    zIndex: -1,
+    visibility: 'hidden',   // keep it invisible; layout still happens
+  }}
+  aria-hidden="true"
+>
+  <PrintableScoreCard scores={scores} animate={false} />
+</div>
+
+
       <motion.h2
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -176,21 +203,32 @@ const ScorecardFeedback = ({ scores, onRetake }) => {
         </div>
       )}
       <div className="flex flex-col sm:flex-row gap-4 mt-8">
-        <motion.button
-          onClick={onRetake}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          className={`group flex items-center justify-center gap-2 rounded-lg px-6 py-3 text-lg font-semibold ${
-            isDark
-              ? 'bg-blue-600 text-white hover:bg-blue-700'
-              : 'bg-blue-500 text-white hover:bg-blue-600'
-          }`}
-        >
-          Retake Quiz
-          <FiArrowRight className="transition-transform group-hover:-rotate-45 group-active:-rotate-12" />
-        </motion.button>
-        <WaitingListModal />
-      </div>
+  <motion.button
+    onClick={onRetake}
+    whileHover={{ scale: 1.02 }}
+    whileTap={{ scale: 0.98 }}
+    className={`group flex items-center justify-center gap-2 rounded-lg px-6 py-3 text-lg font-semibold ${
+      isDark ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-blue-500 text-white hover:bg-blue-600'
+    }`}
+  >
+    Retake Quiz
+    <FiArrowRight className="transition-transform group-hover:-rotate-45 group-active:-rotate-12" />
+  </motion.button>
+
+   <motion.button
+    onClick={() => printClicked()}
+    whileHover={{ scale: 1.02 }}
+    whileTap={{ scale: 0.98 }}
+    className={`group flex items-center justify-center gap-2 rounded-lg px-6 py-3 text-lg font-semibold ${
+      isDark ? 'bg-gray-700 text-white hover:bg-gray-600' : 'bg-gray-200 text-gray-900 hover:bg-gray-300'
+    }`}
+  >
+    Download PDF
+  </motion.button>
+
+  <WaitingListModal />
+</div>
+
     </div>
   );
 };

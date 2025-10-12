@@ -59,9 +59,7 @@ const ScorecardAnalytics = ({ scores, isDark, benchmarkScores }) => {
 
   return (
     <div className="my-8">
-      <h3 className={`text-xl font-semibold mb-4 ${isDark ? 'text-gray-200' : 'text-gray-800'}`}>
-        Leadership Dimensions Balance
-      </h3>
+     
       <Radar ref={chartRef} data={data} options={options} height={300} />
     </div>
   );
