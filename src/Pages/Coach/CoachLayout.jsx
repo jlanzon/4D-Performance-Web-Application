@@ -1,105 +1,111 @@
-import React, { useState } from 'react';
-import { FaHouse } from 'react-icons/fa6';
-import { Outlet, Link, useLocation, Navigate } from 'react-router-dom';
+import React, { useEffect, useState } from "react";
+import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
+import { auth, db } from "../../firebase";
+import { signOut } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
+import {
+  Home,
+  MessageCircle,
+  CheckCircle,
+  BookOpen,
+  Settings,
+  LogOut,
+} from "react-feather";
+import { HomeIcon } from "lucide-react";
 
 const CoachLayout = () => {
   const location = useLocation();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const navigate = useNavigate();
+  const [role, setRole] = useState("user");
+  const [displayName, setDisplayName] = useState("");
 
-  const toggleSidebar = () => setIsSidebarOpen((prev) => !prev);
+  useEffect(() => {
+    const user = auth.currentUser;
+    if (!user) return;
+    (async () => {
+      const snap = await getDoc(doc(db, "users", user.uid));
+      if (snap.exists()) {
+        const data = snap.data();
+        setRole((data.role || "user").toLowerCase());
+        const { firstName, lastName } = data;
+        setDisplayName([firstName, lastName].filter(Boolean).join(" "));
+      }
+    })();
+  }, []);
 
-  const navItems = [
-    { to: 'chat', label: 'Chat', icon: 'M8 10h8m-4-4v8' },
-    { to: 'daily-checkin', label: 'Daily Check-In', icon: 'M5 13l4 4L19 7' },
-    { to: 'blog/list', label: 'Blog', icon: 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5s3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18s-3.332.477-4.5 1.253' },
-    { to: 'settings', label: 'Settings', icon: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37 1 .608 2.296.07 2.572-1.065z' },
-    { to: '/', label: 'Home', icon: <FaHouse />, otherIcon: true}
-
+  const tabs = [
+    { to: "/coach", label: "Dashboard", icon: <Home size={16} /> },
+    { to: "/coach/chat", label: "Chat", icon: <MessageCircle size={16} /> },
+    {
+      to: "/coach/daily-checkin",
+      label: "Daily Check-in",
+      icon: <CheckCircle size={16} />,
+    },
+    { to: "/coach/blog/list", label: "Blog", icon: <BookOpen size={16} /> },
+    { to: "/coach/settings", label: "Settings", icon: <Settings size={16} /> },
   ];
 
+  const isActive = (to) =>
+    location.pathname === to ||
+    (to !== "/coach" && location.pathname.startsWith(to));
+
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white flex">
-      {/* Sidebar */}
-      <aside
-        className={`fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-gray-800 shadow-lg transform 
-          transition-transform duration-300 ease-in-out md:static md:translate-x-0 
-          ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
-      >
-        <div className="p-6">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">
-            Coach Dashboard
-          </h2>
-          <nav className="space-y-2">
-            {navItems.map((item) => (
-              <Link
-                key={item.to}
-                to={item.to}
-                onClick={() => setIsSidebarOpen(false)}
-                className={`flex items-center gap-3 p-3 rounded-lg text-sm font-medium 
-                  transition-colors duration-200
-                  ${
-                    item.to !== '/' && location.pathname.includes(item.to)
-                      ? 'bg-blue-500 text-white'
-                      : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
-                  }`}
-              >
-                {item.otherIcon ? (
-                  <span className="text-xl">{item.icon}</span>) : (<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={item.icon} />
-                </svg>
-                )}
-                
-                {item.label}
-              </Link>
-            ))}
-          </nav>
-        </div>
-        <button
-          onClick={toggleSidebar}
-          className="md:hidden absolute top-4 right-4 p-2 text-gray-600 dark:text-gray-300 
-            hover:text-gray-900 dark:hover:text-white transition-colors duration-200"
-          aria-label="Close sidebar"
-        >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
-      </aside>
-
-      {/* Overlay for mobile */}
-      {isSidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black/50 z-40 md:hidden"
-          onClick={toggleSidebar}
-        />
-      )}
-
-      {/* Main Content */}
-      <main className="flex-1 flex flex-col sticky top-0">
-        {/* Mobile Header */}
-        <header className="md:hidden bg-white dark:bg-gray-800 shadow-sm p-4 flex items-center justify-between">
-          
-          <p className="text-sm font-semibold text-gray-900 dark:text-white">
-            Coach Dashboard
-          </p>
+    <div className="min-h-screen bg-slate-900 text-white">
+      {/* Top bar */}
+      <header className="sticky top-0 z-20 border-b border-slate-800 bg-slate-900/80 backdrop-blur">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+          <div className="flex items-center gap-4">
+            <img src="/logo.png" alt="4D" className="h-8 w-8 rounded" />
+            <div>
+              <p className="text-sm text-slate-300">Welcome back</p>
+              <p className="font-semibold">
+                {displayName || auth.currentUser?.email}
+              </p>
+              <p className="text-xs text-slate-400">Role: {role}</p>
+            </div>
+          </div>
           <button
-            onClick={toggleSidebar}
-            className="p-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 
-              dark:hover:text-white transition-colors duration-200"
-            aria-label="Open sidebar"
+            onClick={() => navigate("/")}
+            className="inline-flex ml-auto mr-2 items-center gap-2 rounded-lg border border-slate-700 px-3 py-1.5 text-sm hover:bg-slate-800"
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
+            <HomeIcon size={14} />
+            Home
           </button>
-        </header>
-
-        {/* Content */}
-        <div className="flex-1">
-          {location.pathname === '/coach' && <Navigate to="chat" replace />}
-          <Outlet />
+          <button
+            onClick={() => signOut(auth)}
+            className="inline-flex items-center gap-2 rounded-lg border border-slate-700 px-3 py-1.5 text-sm hover:bg-slate-800"
+          >
+            <LogOut size={14} />
+            Sign out
+          </button>
         </div>
-      </main>
+      </header>
+
+      {/* Body */}
+      <div className="mx-auto grid max-w-7xl grid-cols-1 gap-6 px-6 py-6 lg:grid-cols-[220px_1fr]">
+        {/* Left nav */}
+        <nav className="sticky top-16 h-max space-y-1">
+          {tabs.map((t) => (
+            <Link
+              key={t.to}
+              to={t.to}
+              className={`group flex items-center gap-2 rounded-xl px-3 py-2 text-sm transition ${
+                isActive(t.to)
+                  ? "bg-indigo-600 text-white"
+                  : "text-slate-300 hover:bg-slate-800"
+              }`}
+            >
+              {t.icon}
+              {t.label}
+            </Link>
+          ))}
+        </nav>
+
+        {/* Outlet */}
+        <main className="min-w-0">
+          <Outlet />
+        </main>
+      </div>
     </div>
   );
 };
